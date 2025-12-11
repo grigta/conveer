@@ -18,10 +18,7 @@ import (
 )
 
 func main() {
-	cfg, err := config.LoadConfig("./config")
-	if err != nil {
-		logger.Fatal("Failed to load config", logger.Field{Key: "error", Value: err.Error()})
-	}
+	cfg := config.LoadConfig()
 
 	log := logger.New(cfg.App.LogLevel, "json")
 	logger.SetDefault(log)

@@ -96,6 +96,7 @@ type ServicesConfig struct {
 	TelegramServiceURL     string
 	MailServiceURL         string
 	MaxServiceURL          string
+	WarmingServiceURL      string
 }
 
 type SMSConfig struct {
@@ -287,6 +288,7 @@ func bindEnvVariables() {
 	viper.BindEnv("services.smsserviceurl", "SMS_SERVICE_HTTP_URL")
 	viper.BindEnv("services.vkserviceurl", "VK_SERVICE_HTTP_URL")
 	viper.BindEnv("services.telegramserviceurl", "TELEGRAM_SERVICE_HTTP_URL")
+	viper.BindEnv("services.warmingserviceurl", "WARMING_SERVICE_HTTP_URL")
 
 	viper.BindEnv("sms.providerconfigpath", "SMS_PROVIDER_CONFIG_PATH")
 	viper.BindEnv("sms.maxretryattempts", "SMS_MAX_RETRY_ATTEMPTS")
