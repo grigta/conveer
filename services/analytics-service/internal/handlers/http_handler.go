@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/conveer/conveer/services/analytics-service/internal/models"
-	"github.com/conveer/conveer/services/analytics-service/internal/service"
+	"github.com/grigta/conveer/services/analytics-service/internal/models"
+	"github.com/grigta/conveer/services/analytics-service/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

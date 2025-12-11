@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package mail;
 
-option go_package = "github.com/conveer/conveer/services/mail-service/proto";
+option go_package = "github.com/grigta/conveer/services/mail-service/proto";
 
 // MailService provides mail account management
 service MailService {

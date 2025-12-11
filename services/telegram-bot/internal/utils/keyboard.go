@@ -3,7 +3,7 @@ package utils
 import (
 	"fmt"
 
-	"github.com/conveer/conveer/services/telegram-bot/internal/models"
+	"github.com/grigta/conveer/services/telegram-bot/internal/models"
 	botmodels "github.com/go-telegram/bot/models"
 )
 

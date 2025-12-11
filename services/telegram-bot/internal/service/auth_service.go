@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/conveer/conveer/services/telegram-bot/internal/models"
-	"github.com/conveer/conveer/services/telegram-bot/internal/repository"
+	"github.com/grigta/conveer/services/telegram-bot/internal/models"
+	"github.com/grigta/conveer/services/telegram-bot/internal/repository"
 )
 
 type AuthService interface {

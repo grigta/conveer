@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/conveer/conveer/pkg/config"
-	"github.com/conveer/conveer/pkg/logger"
-	"github.com/conveer/conveer/services/api-gateway/internal/proxy"
+	"github.com/grigta/conveer/pkg/config"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/api-gateway/internal/proxy"
 	"github.com/gin-gonic/gin"
 )
 

@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/conveer/conveer/pkg/logger"
-	"github.com/conveer/conveer/services/analytics-service/internal/models"
-	"github.com/conveer/conveer/services/analytics-service/internal/service"
-	pb "github.com/conveer/conveer/services/analytics-service/proto"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/analytics-service/internal/models"
+	"github.com/grigta/conveer/services/analytics-service/internal/service"
+	pb "github.com/grigta/conveer/services/analytics-service/proto"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

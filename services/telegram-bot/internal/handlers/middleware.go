@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/conveer/conveer/services/telegram-bot/internal/models"
-	"github.com/conveer/conveer/services/telegram-bot/internal/service"
+	"github.com/grigta/conveer/services/telegram-bot/internal/models"
+	"github.com/grigta/conveer/services/telegram-bot/internal/service"
 	"github.com/go-telegram/bot"
 	botmodels "github.com/go-telegram/bot/models"
 )

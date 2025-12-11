@@ -8,10 +8,10 @@ import (
 	"sort"
 	"time"
 
-	"github.com/conveer/conveer/pkg/cache"
-	"github.com/conveer/conveer/pkg/logger"
-	"github.com/conveer/conveer/services/analytics-service/internal/models"
-	"github.com/conveer/conveer/services/analytics-service/internal/repository"
+	"github.com/grigta/conveer/pkg/cache"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/analytics-service/internal/models"
+	"github.com/grigta/conveer/services/analytics-service/internal/repository"
 
 	"gonum.org/v1/gonum/stat"
 )

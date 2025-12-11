@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package max;
 
-option go_package = "github.com/conveer/conveer/services/max-service/proto";
+option go_package = "github.com/grigta/conveer/services/max-service/proto";
 
 // MaxService provides VK Messenger Max account management
 service MaxService {

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/conveer/conveer/pkg/logger"
+	"github.com/grigta/conveer/pkg/logger"
 )
 
 type RedisCache struct {

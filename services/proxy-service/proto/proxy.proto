@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package proxy;
 
-option go_package = "github.com/conveer/conveer/services/proxy-service/proto";
+option go_package = "github.com/grigta/conveer/services/proxy-service/proto";
 
 service ProxyService {
     rpc AllocateProxy(AllocateProxyRequest) returns (ProxyResponse);

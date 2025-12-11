@@ -1,4 +1,4 @@
-module github.com/conveer/conveer
+module github.com/grigta/conveer
 
 go 1.21
 

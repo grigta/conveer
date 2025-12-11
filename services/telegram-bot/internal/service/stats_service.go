@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	analyticspb "github.com/conveer/conveer/services/analytics-service/proto"
+	analyticspb "github.com/grigta/conveer/services/analytics-service/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

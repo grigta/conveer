@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/conveer/conveer/pkg/config"
-	"github.com/conveer/conveer/pkg/logger"
+	"github.com/grigta/conveer/pkg/config"
+	"github.com/grigta/conveer/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 

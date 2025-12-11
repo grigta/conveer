@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/conveer/conveer/pkg/config"
-	"github.com/conveer/conveer/pkg/middleware"
-	"github.com/conveer/conveer/services/api-gateway/internal/handlers"
+	"github.com/grigta/conveer/pkg/config"
+	"github.com/grigta/conveer/pkg/middleware"
+	"github.com/grigta/conveer/services/api-gateway/internal/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

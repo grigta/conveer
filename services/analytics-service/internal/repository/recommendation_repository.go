@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/conveer/conveer/services/analytics-service/internal/models"
+	"github.com/grigta/conveer/services/analytics-service/internal/models"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

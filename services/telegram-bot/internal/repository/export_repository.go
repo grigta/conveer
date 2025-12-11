@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/conveer/conveer/services/telegram-bot/internal/models"
-	"github.com/conveer/conveer/pkg/crypto"
-	vkpb "github.com/conveer/conveer/services/vk-service/proto"
-	telegrampb "github.com/conveer/conveer/services/telegram-service/proto"
+	"github.com/grigta/conveer/services/telegram-bot/internal/models"
+	"github.com/grigta/conveer/pkg/crypto"
+	vkpb "github.com/grigta/conveer/services/vk-service/proto"
+	telegrampb "github.com/grigta/conveer/services/telegram-service/proto"
 )
 
 type ExportRepository interface {

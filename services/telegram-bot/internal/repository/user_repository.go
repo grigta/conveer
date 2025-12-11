@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/conveer/conveer/services/telegram-bot/internal/models"
+	"github.com/grigta/conveer/services/telegram-bot/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

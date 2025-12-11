@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/conveer/conveer/services/mail-service/internal/models"
-	"github.com/conveer/conveer/pkg/crypto"
+	"github.com/grigta/conveer/services/mail-service/internal/models"
+	"github.com/grigta/conveer/pkg/crypto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

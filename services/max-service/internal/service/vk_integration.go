@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	vkpb "github.com/conveer/conveer/services/vk-service/proto"
+	vkpb "github.com/grigta/conveer/services/vk-service/proto"
 	"github.com/playwright-community/playwright-go"
 )
 

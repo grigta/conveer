@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package vk;
 
-option go_package = "github.com/conveer/conveer/services/vk-service/proto";
+option go_package = "github.com/grigta/conveer/services/vk-service/proto";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";

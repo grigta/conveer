@@ -9,11 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/conveer/conveer/pkg/config"
-	"github.com/conveer/conveer/pkg/crypto"
-	"github.com/conveer/conveer/pkg/logger"
-	"github.com/conveer/conveer/services/api-gateway/internal/handlers"
-	"github.com/conveer/conveer/services/api-gateway/internal/routes"
+	"github.com/grigta/conveer/pkg/config"
+	"github.com/grigta/conveer/pkg/crypto"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/api-gateway/internal/handlers"
+	"github.com/grigta/conveer/services/api-gateway/internal/routes"
 	"github.com/gin-gonic/gin"
 )
 

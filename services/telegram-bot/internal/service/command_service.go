@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/conveer/conveer/services/telegram-bot/internal/models"
-	"github.com/conveer/conveer/pkg/messaging"
+	"github.com/grigta/conveer/services/telegram-bot/internal/models"
+	"github.com/grigta/conveer/pkg/messaging"
 )
 
 type CommandService interface {

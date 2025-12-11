@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/conveer/conveer/pkg/logger"
-	"github.com/conveer/conveer/pkg/messaging"
-	"github.com/conveer/conveer/services/analytics-service/internal/models"
-	"github.com/conveer/conveer/services/analytics-service/internal/repository"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/pkg/messaging"
+	"github.com/grigta/conveer/services/analytics-service/internal/models"
+	"github.com/grigta/conveer/services/analytics-service/internal/repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

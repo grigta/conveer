@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/conveer/conveer/services/mail-service/internal/models"
-	proxypb "github.com/conveer/conveer/services/proxy-service/proto"
-	smspb "github.com/conveer/conveer/services/sms-service/proto"
+	"github.com/grigta/conveer/services/mail-service/internal/models"
+	proxypb "github.com/grigta/conveer/services/proxy-service/proto"
+	smspb "github.com/grigta/conveer/services/sms-service/proto"
 	"github.com/playwright-community/playwright-go"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/streadway/amqp"
-	"github.com/conveer/conveer/pkg/logger"
+	"github.com/grigta/conveer/pkg/logger"
 )
 
 type RabbitMQ struct {

@@ -7,12 +7,12 @@ import (
 	"sort"
 	"time"
 
-	"github.com/conveer/conveer/pkg/cache"
-	"github.com/conveer/conveer/pkg/logger"
-	"github.com/conveer/conveer/services/analytics-service/internal/models"
-	"github.com/conveer/conveer/services/analytics-service/internal/repository"
-	proxypb "github.com/conveer/conveer/services/proxy-service/proto"
-	warmingpb "github.com/conveer/conveer/services/warming-service/proto"
+	"github.com/grigta/conveer/pkg/cache"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/analytics-service/internal/models"
+	"github.com/grigta/conveer/services/analytics-service/internal/repository"
+	proxypb "github.com/grigta/conveer/services/proxy-service/proto"
+	warmingpb "github.com/grigta/conveer/services/warming-service/proto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

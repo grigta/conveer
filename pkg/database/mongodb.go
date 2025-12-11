@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
-	"github.com/conveer/conveer/pkg/logger"
+	"github.com/grigta/conveer/pkg/logger"
 )
 
 type MongoDB struct {

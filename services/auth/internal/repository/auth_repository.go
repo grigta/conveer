@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/conveer/conveer/pkg/cache"
-	"github.com/conveer/conveer/pkg/database"
-	"github.com/conveer/conveer/pkg/models"
+	"github.com/grigta/conveer/pkg/cache"
+	"github.com/grigta/conveer/pkg/database"
+	"github.com/grigta/conveer/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
