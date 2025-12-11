@@ -1,0 +1,74 @@
+providers:
+  - name: "provider1"
+    type: "mobile"
+    enabled: true
+    priority: 1
+    api:
+      base_url: "https://api.provider1.com"
+      auth_type: "bearer"
+      auth_key: "${PROVIDER1_API_KEY}"
+    endpoints:
+      list: "/v1/proxies"
+      purchase: "/v1/proxies/buy"
+      release: "/v1/proxies/release"
+      rotate: "/v1/proxies/rotate"
+      check: "/v1/proxies/check"
+    parameters:
+      countries: ["RU", "US", "DE", "GB", "FR"]
+      protocols: ["http", "https", "socks5"]
+      rotation_type: "api"
+      rotation_interval: "24h"
+      max_concurrent: 100
+      min_pool_size: 10
+    pricing:
+      cost_per_proxy: 5.0
+      currency: "USD"
+
+  - name: "provider2"
+    type: "residential"
+    enabled: true
+    priority: 2
+    api:
+      base_url: "https://api.provider2.com"
+      auth_type: "api_key"
+      auth_key: "${PROVIDER2_API_KEY}"
+    endpoints:
+      list: "/api/proxy/list"
+      purchase: "/api/proxy/order"
+      release: "/api/proxy/delete"
+      rotate: "/api/proxy/refresh"
+      check: "/api/proxy/status"
+    parameters:
+      countries: ["RU", "US", "DE", "CN", "JP", "BR"]
+      protocols: ["http", "https"]
+      rotation_type: "scheduled"
+      rotation_interval: "12h"
+      max_concurrent: 200
+      min_pool_size: 20
+    pricing:
+      cost_per_proxy: 3.5
+      currency: "USD"
+
+  - name: "provider3"
+    type: "mobile"
+    enabled: false
+    priority: 3
+    api:
+      base_url: "https://api.provider3.com"
+      auth_type: "basic"
+      auth_key: "${PROVIDER3_API_KEY}"
+    endpoints:
+      list: "/proxies/all"
+      purchase: "/proxies/create"
+      release: "/proxies/remove"
+      rotate: "/proxies/renew"
+    parameters:
+      countries: ["RU", "UA", "BY", "KZ"]
+      protocols: ["socks5"]
+      rotation_type: "manual"
+      rotation_interval: "48h"
+      max_concurrent: 50
+      min_pool_size: 5
+    pricing:
+      cost_per_proxy: 7.0
+      currency: "USD"

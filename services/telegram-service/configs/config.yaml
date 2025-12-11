@@ -1,0 +1,31 @@
+telegram:
+  registration:
+    max_retry_attempts: 3
+    retry_backoff_base: 60
+    form_fill_delay_min: 100
+    form_fill_delay_max: 500
+    sms_wait_timeout: 300
+    page_load_timeout: 30
+    sms_polling_interval: 10
+    max_sms_polls: 30
+    two_factor_delay: 5
+
+  browser:
+    pool_size: 10
+    headless: true
+    user_data_dir: "/tmp/telegram-profiles"
+
+  anti_detection:
+    enable_stealth: true
+    randomize_fingerprint: true
+    mouse_emulation: true
+
+  monitoring:
+    stuck_registration_timeout: 30
+    session_cleanup_interval: 60
+    session_expiry: 120
+
+  api:
+    default_api_id: 0
+    default_api_hash: ""
+    web_url: "https://web.telegram.org/k/"

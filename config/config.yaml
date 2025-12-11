@@ -1,0 +1,55 @@
+app:
+  env: development
+  port: 8080
+  debug: true
+  loglevel: info
+
+database:
+  uri: mongodb://admin:admin123@mongodb:27017
+  dbname: conveer
+
+redis:
+  host: redis
+  port: 6379
+  password: ""
+  db: 0
+
+rabbitmq:
+  url: amqp://guest:guest@rabbitmq:5672/
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiresin: 24h
+
+encryption:
+  key: ${ENCRYPTION_KEY}
+
+services:
+  authserviceurl: http://auth-service:8001
+  userserviceurl: http://user-service:8002
+  productserviceurl: http://product-service:8003
+  orderserviceurl: http://order-service:8004
+  notificationserviceurl: http://notification-service:8005
+  analyticsserviceurl: http://analytics-service:8006
+  proxyserviceurl: http://proxy-service:8007
+  smsserviceurl: http://sms-service:8008
+  vkserviceurl: http://vk-service:8009
+  telegramserviceurl: http://telegram-service:8010
+  mailserviceurl: http://mail-service:8011
+  maxserviceurl: http://max-service:8012
+  warmingserviceurl: http://warming-service:8013
+
+sms:
+  providerconfigpath: ./configs/providers.yaml
+  maxretryattempts: 3
+  codewaittimeout: 5m
+  activationexpiry: 30m
+
+monitoring:
+  prometheusport: 9090
+  grafanaport: 3000
+
+ratelimit:
+  enabled: true
+  requests: 100
+  window: 60s

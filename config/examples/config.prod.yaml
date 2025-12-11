@@ -1,0 +1,165 @@
+# Production Configuration
+# This file contains settings optimized for production environment
+# IMPORTANT: Sensitive values should come from environment variables or secrets management
+
+environment: production
+
+server:
+  http_port: 8080
+  grpc_port: 50051
+  read_timeout: 30s
+  write_timeout: 30s
+  shutdown_timeout: 60s  # Longer for graceful shutdown
+
+mongodb:
+  # MUST use environment variable: ${MONGODB_URI}
+  database: conveer
+  connect_timeout: 10s
+  max_pool_size: 100
+  # Enable replica set
+  replica_set: rs0
+
+redis:
+  # MUST use environment variable: ${REDIS_ADDR}
+  db: 0
+  pool_size: 100
+  # Enable cluster mode if using Redis Cluster
+  cluster_mode: false
+
+rabbitmq:
+  # MUST use environment variable: ${RABBITMQ_URL}
+  prefetch_count: 100
+  reconnect_delay: 5s
+  # Enable HA queues
+  ha_mode: true
+
+logging:
+  level: info
+  format: json
+  output: stdout
+  # Enable structured logging fields
+  include_caller: true
+  include_stack_trace: false  # Only for errors
+
+# Proxy Service Configuration
+proxy:
+  pool:
+    min_size: 50
+    max_size: 500
+  health_check:
+    interval: 5m
+    timeout: 15s
+    max_fraud_score: 60  # Stricter in production
+  rotation:
+    before_expiry: 48h  # More buffer time
+    check_interval: 30m
+  providers:
+    - name: brightdata
+      enabled: true
+      api_url: https://api.brightdata.com
+      auth_type: bearer
+      rate_limit: 100  # requests per second
+      timeout: 30s
+      retry_count: 3
+    - name: smartproxy
+      enabled: true
+      api_url: https://api.smartproxy.com
+      auth_type: api_key
+      rate_limit: 100
+      timeout: 30s
+      retry_count: 3
+    - name: oxylabs
+      enabled: true
+      api_url: https://api.oxylabs.io
+      auth_type: basic
+      rate_limit: 50
+      timeout: 30s
+      retry_count: 3
+
+# SMS Service Configuration
+sms:
+  code_timeout: 300s  # 5 minutes
+  max_retries: 4
+  retry_backoff: 60s
+  providers:
+    - name: sms-activate
+      enabled: true
+      api_url: https://api.sms-activate.org/stubs/handler_api.php
+      priority: 1
+      rate_limit: 20
+    - name: 5sim
+      enabled: true
+      api_url: https://5sim.net/v1
+      priority: 2
+      rate_limit: 15
+    - name: smspva
+      enabled: true
+      api_url: https://smspva.com/api
+      priority: 3
+      rate_limit: 10
+
+# Warming Service Configuration
+warming:
+  max_parallel_tasks: 200
+  default_scenario: basic
+  active_hours:
+    start: 9
+    end: 23
+  behavior:
+    min_delay: 60s   # Minimum 1 minute between actions
+    max_delay: 600s  # Maximum 10 minutes
+    skip_night_hours: true
+    skip_weekends: true  # Reduced activity on weekends
+    weekend_activity_reduction: 0.5  # 50% reduction
+
+# IPQS Configuration
+ipqs:
+  enabled: true
+  api_url: https://ipqualityscore.com/api
+  timeout: 10s
+  cache_ttl: 1h  # Cache results
+
+# Telegram Bot Configuration
+telegram:
+  polling_timeout: 60s
+  rate_limit: 10  # More conservative
+
+# Metrics
+metrics:
+  enabled: true
+  path: /metrics
+  port: 9090
+
+# Alerting
+alerting:
+  enabled: true
+  slack_webhook: ${SLACK_WEBHOOK_URL}
+  pagerduty_key: ${PAGERDUTY_KEY}
+  email: ops@conveer.example.com
+
+# Rate Limiting
+rate_limiting:
+  enabled: true
+  default_rps: 100
+  burst: 200
+  per_user_rps: 10
+
+# Security
+security:
+  cors:
+    enabled: true
+    allowed_origins:
+      - https://conveer.example.com
+      - https://admin.conveer.example.com
+  tls:
+    enabled: true
+    cert_file: /etc/ssl/certs/conveer.crt
+    key_file: /etc/ssl/private/conveer.key
+
+# Tracing (optional)
+tracing:
+  enabled: true
+  provider: jaeger
+  endpoint: http://jaeger:14268/api/traces
+  sample_rate: 0.1  # 10% sampling
+

@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package vk;
+
+option go_package = "conveer/services/vk-service/proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service VKService {
+  rpc CreateAccount(CreateAccountRequest) returns (Account);
+  rpc GetAccount(GetAccountRequest) returns (Account);
+  rpc GetAccountCredentials(GetAccountRequest) returns (AccountCredentials);
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
+  rpc UpdateAccountStatus(UpdateStatusRequest) returns (Account);
+  rpc RetryRegistration(RetryRequest) returns (Account);
+  rpc DeleteAccount(DeleteAccountRequest) returns (google.protobuf.Empty);
+  rpc GetStatistics(google.protobuf.Empty) returns (Statistics);
+}
+
+message CreateAccountRequest {
+  string first_name = 1;
+  string last_name = 2;
+  google.protobuf.Timestamp birth_date = 3;
+  string gender = 4;
+  string preferred_country = 5;
+  bool use_random_profile = 6;
+}
+
+message GetAccountRequest {
+  string account_id = 1;
+}
+
+message ListAccountsRequest {
+  string status = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message UpdateStatusRequest {
+  string account_id = 1;
+  string status = 2;
+}
+
+message RetryRequest {
+  string account_id = 1;
+}
+
+message DeleteAccountRequest {
+  string account_id = 1;
+}
+
+message Account {
+  string id = 1;
+  string phone = 2;
+  string email = 3;
+  string first_name = 4;
+  string last_name = 5;
+  string username = 6;
+  string user_id = 7;
+  string status = 8;
+  string proxy_id = 9;
+  string activation_id = 10;
+  string user_agent = 11;
+  map<string, string> fingerprint = 12;
+  string registration_ip = 13;
+  google.protobuf.Timestamp created_at = 14;
+  google.protobuf.Timestamp updated_at = 15;
+  google.protobuf.Timestamp last_login_at = 16;
+  string error_message = 17;
+  int32 retry_count = 18;
+}
+
+message ListAccountsResponse {
+  repeated Account accounts = 1;
+  int32 total = 2;
+  int32 offset = 3;
+  int32 limit = 4;
+}
+
+message Statistics {
+  int64 total = 1;
+  map<string, int64> by_status = 2;
+  double success_rate = 3;
+  double average_retries = 4;
+  int64 last_hour = 5;
+  int64 last_24_hours = 6;
+}
+
+message AccountCredentials {
+  string account_id = 1;
+  string password = 2;
+  string cookies = 3;
+  string access_token = 4;
+}

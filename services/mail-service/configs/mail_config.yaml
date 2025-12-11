@@ -1,0 +1,18 @@
+registration:
+  max_retry_attempts: 3
+  retry_backoff_base: 5m
+  form_fill_delay_min: 500
+  form_fill_delay_max: 2000
+  sms_wait_timeout: 5m
+  page_load_timeout: 30s
+  sms_polling_interval: 10s
+  max_sms_polls: 30
+  enable_phone_verification: true
+  captcha_timeout: 10m
+
+browser:
+  pool_size: 10
+  headless: true
+  timeout: 30s
+  viewport_width: 1920
+  viewport_height: 1080

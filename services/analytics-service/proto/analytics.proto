@@ -1,0 +1,244 @@
+syntax = "proto3";
+
+package analytics;
+option go_package = "conveer/services/analytics-service/proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service AnalyticsService {
+  // Получение агрегированной статистики
+  rpc GetOverallAnalytics(AnalyticsRequest) returns (OverallAnalytics);
+  rpc GetPlatformAnalytics(PlatformRequest) returns (PlatformAnalytics);
+
+  // Прогнозы
+  rpc GetExpenseForecast(ForecastRequest) returns (ExpenseForecastResponse);
+  rpc GetAccountReadinessForecast(ReadinessRequest) returns (ReadinessForecastResponse);
+  rpc GetOptimalRegistrationTime(OptimalTimeRequest) returns (OptimalTimeResponse);
+
+  // Рекомендации
+  rpc GetProxyProviderRankings(google.protobuf.Empty) returns (ProxyRankingsResponse);
+  rpc GetWarmingScenarioRecommendations(PlatformRequest) returns (WarmingRecommendationsResponse);
+  rpc GetErrorPatternAnalysis(AnalysisRequest) returns (ErrorPatternResponse);
+
+  // Алерты
+  rpc GetActiveAlerts(AlertsRequest) returns (AlertsResponse);
+  rpc AcknowledgeAlert(AcknowledgeRequest) returns (google.protobuf.Empty);
+
+  // Управление правилами алертов
+  rpc CreateAlertRule(CreateRuleRequest) returns (AlertRuleResponse);
+  rpc UpdateAlertRule(UpdateRuleRequest) returns (AlertRuleResponse);
+  rpc DeleteAlertRule(DeleteRuleRequest) returns (google.protobuf.Empty);
+  rpc ListAlertRules(google.protobuf.Empty) returns (AlertRulesResponse);
+}
+
+message AnalyticsRequest {
+  google.protobuf.Timestamp start_date = 1;
+  google.protobuf.Timestamp end_date = 2;
+}
+
+message OverallAnalytics {
+  int64 total_accounts = 1;
+  map<string, int64> accounts_by_platform = 2;
+  map<string, int64> accounts_by_status = 3;
+  double overall_success_rate = 4;
+  double overall_ban_rate = 5;
+
+  ExpensesSummary expenses = 6;
+  ResourcesSummary resources = 7;
+  PerformanceSummary performance = 8;
+
+  repeated TrendData trends = 9;
+}
+
+message ExpensesSummary {
+  double total_spent_today = 1;
+  double total_spent_week = 2;
+  double total_spent_month = 3;
+  double sms_spent = 4;
+  double proxy_spent = 5;
+  double avg_cost_per_account = 6;
+}
+
+message ResourcesSummary {
+  int64 active_proxies = 1;
+  int64 banned_proxies = 2;
+  double sms_balance = 3;
+  int64 warming_tasks_active = 4;
+}
+
+message PerformanceSummary {
+  double avg_warming_days = 1;
+  int64 accounts_created_today = 2;
+  int64 accounts_ready_today = 3;
+  double error_rate = 4;
+  repeated ErrorStat top_errors = 5;
+}
+
+message TrendData {
+  google.protobuf.Timestamp date = 1;
+  int64 accounts_created = 2;
+  int64 accounts_banned = 3;
+  double expenses = 4;
+}
+
+message PlatformRequest {
+  string platform = 1;
+}
+
+message PlatformAnalytics {
+  string platform = 1;
+  int64 total_accounts = 2;
+  map<string, int64> by_status = 3;
+  double success_rate = 4;
+  double ban_rate = 5;
+  double avg_warming_days = 6;
+  double total_spent = 7;
+  repeated string recommendations = 8;
+}
+
+message ForecastRequest {
+  string period = 1;
+}
+
+message ExpenseForecastResponse {
+  string period = 1;
+  double predicted_cost = 2;
+  double upper_bound = 3;
+  double lower_bound = 4;
+  map<string, double> breakdown = 5;
+  double confidence = 6;
+  google.protobuf.Timestamp generated_at = 7;
+}
+
+message ReadinessRequest {
+  string account_id = 1;
+  string platform = 2;
+}
+
+message ReadinessForecastResponse {
+  string account_id = 1;
+  int32 estimated_days = 2;
+  google.protobuf.Timestamp completion_date = 3;
+  double current_progress = 4;
+}
+
+message OptimalTimeRequest {
+  string platform = 1;
+}
+
+message OptimalTimeResponse {
+  repeated int32 best_hours = 1;
+  repeated string best_days = 2;
+  double success_rate = 3;
+  int64 sample_size = 4;
+}
+
+message ProxyRankingsResponse {
+  repeated ProviderRanking rankings = 1;
+  google.protobuf.Timestamp generated_at = 2;
+}
+
+message ProviderRanking {
+  string provider = 1;
+  double score = 2;
+  double success_rate = 3;
+  double avg_latency = 4;
+  double ban_rate = 5;
+  double cost_per_account = 6;
+  string recommendation = 7;
+}
+
+message WarmingRecommendationsResponse {
+  string platform = 1;
+  string recommended_type = 2;
+  int32 recommended_days = 3;
+  double success_rate = 4;
+  string reasoning = 5;
+}
+
+message AnalysisRequest {
+  int32 days = 1;
+}
+
+message ErrorPatternResponse {
+  repeated ErrorCluster clusters = 1;
+}
+
+message ErrorCluster {
+  string pattern = 1;
+  int64 frequency = 2;
+  repeated string affected_platforms = 3;
+  string root_cause = 4;
+  string mitigation = 5;
+}
+
+message AlertsRequest {
+  bool unacknowledged_only = 1;
+  string severity = 2;
+}
+
+message AlertsResponse {
+  repeated AlertEvent alerts = 1;
+}
+
+message AlertEvent {
+  string id = 1;
+  string rule_name = 2;
+  string severity = 3;
+  string platform = 4;
+  string message = 5;
+  double current_value = 6;
+  double threshold = 7;
+  google.protobuf.Timestamp fired_at = 8;
+  bool acknowledged = 9;
+}
+
+message AcknowledgeRequest {
+  string alert_id = 1;
+}
+
+message CreateRuleRequest {
+  string name = 1;
+  string type = 2;
+  string platform = 3;
+  AlertThreshold threshold = 4;
+  string severity = 5;
+  int32 cooldown = 6;
+}
+
+message UpdateRuleRequest {
+  string rule_id = 1;
+  bool enabled = 2;
+  AlertThreshold threshold = 3;
+  int32 cooldown = 4;
+}
+
+message DeleteRuleRequest {
+  string rule_id = 1;
+}
+
+message AlertRuleResponse {
+  string id = 1;
+  string name = 2;
+  string type = 3;
+  string platform = 4;
+  bool enabled = 5;
+  AlertThreshold threshold = 6;
+  string severity = 7;
+  int32 cooldown = 8;
+}
+
+message AlertRulesResponse {
+  repeated AlertRuleResponse rules = 1;
+}
+
+message AlertThreshold {
+  string operator = 1;
+  double value = 2;
+}
+
+message ErrorStat {
+  string type = 1;
+  int64 count = 2;
+}

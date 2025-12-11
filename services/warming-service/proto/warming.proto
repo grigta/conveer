@@ -1,0 +1,160 @@
+syntax = "proto3";
+
+package warming;
+
+option go_package = "conveer/services/warming-service/proto";
+
+import "google/protobuf/timestamp.proto";
+
+service WarmingService {
+  rpc StartWarming(StartWarmingRequest) returns (WarmingTask);
+  rpc PauseWarming(TaskRequest) returns (WarmingTask);
+  rpc ResumeWarming(TaskRequest) returns (WarmingTask);
+  rpc StopWarming(TaskRequest) returns (WarmingTask);
+  rpc GetWarmingStatus(TaskRequest) returns (WarmingTask);
+  rpc GetWarmingStatistics(StatisticsRequest) returns (WarmingStatistics);
+  rpc GetScenarioStatistics(ScenarioStatisticsRequest) returns (ScenarioStatisticsResponse);
+  rpc CreateCustomScenario(CreateScenarioRequest) returns (WarmingScenario);
+  rpc UpdateCustomScenario(UpdateScenarioRequest) returns (WarmingScenario);
+  rpc ListScenarios(ListScenariosRequest) returns (ListScenariosResponse);
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+}
+
+message StartWarmingRequest {
+  string account_id = 1;
+  string platform = 2;  // "vk", "telegram", "mail", "max"
+  string scenario_type = 3;  // "basic", "advanced", "custom"
+  string scenario_id = 4;  // optional, for custom scenarios
+  int32 duration_days = 5;  // 14-30 or 30-60
+}
+
+message TaskRequest {
+  string task_id = 1;
+}
+
+message WarmingTask {
+  string id = 1;
+  string account_id = 2;
+  string platform = 3;
+  string scenario_type = 4;
+  string scenario_id = 5;
+  int32 duration_days = 6;
+  string status = 7;
+  int32 current_day = 8;
+  int32 actions_completed = 9;
+  int32 actions_failed = 10;
+  string last_error = 11;
+  google.protobuf.Timestamp next_action_at = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+  google.protobuf.Timestamp completed_at = 15;
+}
+
+message StatisticsRequest {
+  string platform = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+}
+
+message WarmingStatistics {
+  int64 total_tasks = 1;
+  int64 completed_tasks = 2;
+  int64 failed_tasks = 3;
+  int64 in_progress_tasks = 4;
+  double success_rate = 5;
+  double avg_duration_days = 6;
+  map<string, int64> by_platform = 7;
+  map<string, int64> by_scenario = 8;
+  repeated ActionStatistic top_actions = 9;
+  repeated ErrorStatistic common_errors = 10;
+  repeated DailyStatistic daily_breakdown = 11;
+}
+
+message ActionStatistic {
+  string action_type = 1;
+  int64 count = 2;
+  double success_rate = 3;
+  double avg_duration_ms = 4;
+}
+
+message ErrorStatistic {
+  string error_type = 1;
+  int64 count = 2;
+  double percentage = 3;
+}
+
+message DailyStatistic {
+  google.protobuf.Timestamp date = 1;
+  int64 tasks_started = 2;
+  int64 tasks_completed = 3;
+  int64 tasks_failed = 4;
+  int64 actions_executed = 5;
+  double success_rate = 6;
+}
+
+message CreateScenarioRequest {
+  string name = 1;
+  string description = 2;
+  string platform = 3;
+  string actions_json = 4;  // JSON-encoded actions config
+  string schedule_json = 5;  // JSON-encoded schedule
+  string created_by = 6;
+}
+
+message UpdateScenarioRequest {
+  string scenario_id = 1;
+  string name = 2;
+  string description = 3;
+  string actions_json = 4;
+  string schedule_json = 5;
+}
+
+message WarmingScenario {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string platform = 4;
+  bool is_active = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message ListScenariosRequest {
+  string platform = 1;
+}
+
+message ListScenariosResponse {
+  repeated WarmingScenario scenarios = 1;
+}
+
+message ListTasksRequest {
+  string platform = 1;
+  string status = 2;
+  string account_id = 3;
+  int32 limit = 4;
+  int32 offset = 5;
+}
+
+message ListTasksResponse {
+  repeated WarmingTask tasks = 1;
+  int64 total_count = 2;
+}
+
+message ScenarioStatisticsRequest {
+  string platform = 1;
+  int32 days = 2; // Number of days to look back (default 7)
+}
+
+message ScenarioStatisticsResponse {
+  repeated ScenarioStats scenario_stats = 1;
+}
+
+message ScenarioStats {
+  string scenario_type = 1; // "basic", "advanced", "custom"
+  double success_rate = 2;
+  double avg_duration_days = 3;
+  int64 completed_tasks = 4;
+  int64 failed_tasks = 5;
+  int64 total_tasks = 6;
+  string platform = 7;
+}

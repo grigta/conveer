@@ -1,0 +1,98 @@
+service:
+  name: analytics-service
+  grpc_port: 50056
+  http_port: 8014
+
+prometheus:
+  url: http://prometheus:9090
+
+mongodb:
+  uri: ${MONGODB_URI}
+  database: conveer
+  collections:
+    metrics_ttl: 2160h # 90 days
+    forecasts_ttl: 24h
+    recommendations_ttl: 168h # 7 days
+    alerts_ttl: 720h # 30 days
+
+redis:
+  url: ${REDIS_URL}
+  password: ${REDIS_PASSWORD}
+  db: 0
+
+rabbitmq:
+  url: ${RABBITMQ_URL}
+  exchange: bot.events
+
+aggregation:
+  interval: 5m
+
+forecasting:
+  interval: 1h
+  expense_periods:
+    - 7d
+    - 30d
+  confidence_level: 0.95
+
+recommendations:
+  interval: 6h
+  proxy_score_weights:
+    success_rate: 0.4
+    ban_rate: 0.3
+    latency: 0.2
+    cost: 0.1
+
+alerts:
+  check_interval: 1m
+  default_cooldown: 30m
+  monthly_budget: 10000.0  # Месячный бюджет в долларах
+  budget_period: 30d        # Период подсчета расходов
+  rules:
+    - name: "Высокий процент банов"
+      type: ban_rate
+      platform: all
+      threshold:
+        operator: ">"
+        value: 15.0
+      severity: critical
+      cooldown: 30
+
+    - name: "Высокий процент ошибок"
+      type: error_rate
+      platform: all
+      threshold:
+        operator: ">"
+        value: 20.0
+      severity: warning
+      cooldown: 15
+
+    - name: "Превышение бюджета"
+      type: budget
+      platform: all
+      threshold:
+        operator: ">"
+        value: 80.0
+      severity: critical
+      cooldown: 60
+
+    - name: "Низкий баланс SMS"
+      type: balance
+      platform: all
+      threshold:
+        operator: "<"
+        value: 1000.0
+      severity: warning
+      cooldown: 120
+
+cache:
+  forecast_ttl: 1h
+  recommendations_ttl: 6h
+
+grpc_services:
+  vk-service: vk-service:50051
+  telegram-service: telegram-service:50052
+  mail-service: mail-service:50053
+  max-service: max-service:50054
+  warming-service: warming-service:50055
+  proxy-service: proxy-service:50057
+  sms-service: sms-service:50058

@@ -1,0 +1,73 @@
+providers:
+  smsactivate:
+    name: SMSActivate
+    enabled: true
+    priority: 1
+    api_url: https://api.sms-activate.org/stubs/handler_api.php
+    supported_services:
+      - whatsapp
+      - telegram
+      - google
+      - facebook
+      - instagram
+      - twitter
+      - vk
+      - other
+    supported_countries:
+      - US
+      - RU
+      - KZ
+      - CN
+      - PH
+      - MM
+      - ID
+      - MY
+      - KE
+      - TZ
+      - VN
+      - GB
+      - LV
+      - PL
+      - UA
+    pricing:
+      base_price: 10.0
+      currency: RUB
+      service_multipliers:
+        whatsapp: 1.5
+        telegram: 1.2
+        google: 2.0
+        facebook: 1.8
+        instagram: 1.6
+        twitter: 1.4
+        vk: 1.0
+    rate_limits:
+      requests_per_minute: 60
+      requests_per_hour: 1000
+    retry_config:
+      max_attempts: 3
+      backoff_seconds: 5
+      max_backoff_seconds: 60
+
+  # Additional providers can be added here
+  # example_provider:
+  #   name: ExampleProvider
+  #   enabled: false
+  #   priority: 2
+  #   api_url: https://api.example.com
+  #   api_version: v1
+  #   supported_services:
+  #     - all
+  #   supported_countries:
+  #     - all
+
+default_provider: smsactivate
+
+provider_selection:
+  strategy: priority # Options: priority, round_robin, least_cost, fastest_response
+  fallback_enabled: true
+  health_check_interval_seconds: 60
+
+global_limits:
+  max_activations_per_user_per_hour: 100
+  max_activations_per_user_per_day: 500
+  max_pending_activations_per_user: 10

@@ -1,0 +1,22 @@
+# Add these routes to the routes.go file after the max group:
+
+		warming := api.Group("/warming")
+		warming.Use(authMiddleware.Authenticate())
+		{
+			warming.POST("/start", h.WarmingProxy)
+			warming.POST("/:taskId/pause", h.WarmingProxy)
+			warming.POST("/:taskId/resume", h.WarmingProxy)
+			warming.POST("/:taskId/stop", h.WarmingProxy)
+			warming.GET("/:taskId", h.WarmingProxy)
+			warming.GET("/statistics", h.WarmingProxy)
+			warming.POST("/scenarios", h.WarmingProxy)
+			warming.PUT("/scenarios/:scenarioId", h.WarmingProxy)
+			warming.GET("/scenarios", h.WarmingProxy)
+			warming.GET("/tasks", h.WarmingProxy)
+		}
+
+# Also add to handlers/handlers.go:
+
+func (h *Handlers) WarmingProxy(c *gin.Context) {
+	h.proxyRequest(c, "warming-service:8013")
+}

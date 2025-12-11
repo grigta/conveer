@@ -1,0 +1,1413 @@
+openapi: 3.0.3
+info:
+  title: Conveer API
+  description: |
+    API для управления автоматизированным конвейером создания и прогрева аккаунтов 
+    в социальных сетях (VK, Telegram, Mail.ru, Max).
+    
+    ## Аутентификация
+    API использует Bearer токен для аутентификации. Токен можно получить через Telegram бота.
+    
+    ## Rate Limiting
+    - 100 запросов в минуту для обычных endpoint'ов
+    - 10 запросов в минуту для операций создания аккаунтов
+    
+    ## Коды ошибок
+    - `400` - Некорректный запрос
+    - `401` - Не авторизован
+    - `403` - Доступ запрещён
+    - `404` - Ресурс не найден
+    - `429` - Превышен лимит запросов
+    - `500` - Внутренняя ошибка сервера
+  version: 1.0.0
+  contact:
+    name: Conveer Team
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: https://api.conveer.example.com/v1
+    description: Production server
+
+tags:
+  - name: accounts
+    description: Управление аккаунтами
+  - name: proxies
+    description: Управление прокси
+  - name: warming
+    description: Прогрев аккаунтов
+  - name: sms
+    description: SMS активация
+  - name: analytics
+    description: Аналитика и статистика
+  - name: health
+    description: Проверка состояния сервисов
+
+paths:
+  /health:
+    get:
+      tags:
+        - health
+      summary: Проверка состояния API
+      description: Возвращает статус работоспособности API Gateway и подключенных сервисов
+      operationId: getHealth
+      responses:
+        '200':
+          description: Сервис работает
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Сервис недоступен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  # ==================== Accounts ====================
+  /accounts:
+    get:
+      tags:
+        - accounts
+      summary: Получить список аккаунтов
+      description: Возвращает список аккаунтов с фильтрацией и пагинацией
+      operationId: listAccounts
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: platform
+          in: query
+          description: Фильтр по платформе
+          schema:
+            $ref: '#/components/schemas/Platform'
+        - name: status
+          in: query
+          description: Фильтр по статусу
+          schema:
+            $ref: '#/components/schemas/AccountStatus'
+      responses:
+        '200':
+          description: Список аккаунтов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Account'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags:
+        - accounts
+      summary: Создать новый аккаунт
+      description: |
+        Запускает процесс создания нового аккаунта на указанной платформе.
+        Процесс включает получение прокси, SMS-кода и регистрацию.
+      operationId: createAccount
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '202':
+          description: Задача на создание аккаунта принята
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAccountResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /accounts/{accountId}:
+    get:
+      tags:
+        - accounts
+      summary: Получить информацию об аккаунте
+      operationId: getAccount
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AccountIdParam'
+      responses:
+        '200':
+          description: Информация об аккаунте
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - accounts
+      summary: Удалить аккаунт
+      description: Удаляет аккаунт и освобождает связанные ресурсы (прокси)
+      operationId: deleteAccount
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AccountIdParam'
+      responses:
+        '204':
+          description: Аккаунт удалён
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /accounts/{accountId}/credentials:
+    get:
+      tags:
+        - accounts
+      summary: Получить учётные данные аккаунта
+      description: Возвращает расшифрованные логин и пароль аккаунта
+      operationId: getAccountCredentials
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AccountIdParam'
+      responses:
+        '200':
+          description: Учётные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountCredentials'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ==================== Proxies ====================
+  /proxies:
+    get:
+      tags:
+        - proxies
+      summary: Получить список прокси
+      operationId: listProxies
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProxyStatus'
+        - name: provider
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список прокси
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Proxy'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /proxies/allocate:
+    post:
+      tags:
+        - proxies
+      summary: Аллоцировать прокси для аккаунта
+      description: |
+        Выделяет прокси для указанного аккаунта. Если свободных прокси нет,
+        покупает новый у провайдера.
+      operationId: allocateProxy
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AllocateProxyRequest'
+      responses:
+        '200':
+          description: Прокси выделен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proxy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          description: Нет доступных прокси
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /proxies/{proxyId}/release:
+    post:
+      tags:
+        - proxies
+      summary: Освободить прокси
+      operationId: releaseProxy
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProxyIdParam'
+      responses:
+        '200':
+          description: Прокси освобождён
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /proxies/{proxyId}/rotate:
+    post:
+      tags:
+        - proxies
+      summary: Принудительная ротация прокси
+      description: Заменяет текущий прокси на новый
+      operationId: rotateProxy
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProxyIdParam'
+      responses:
+        '200':
+          description: Прокси заменён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proxy'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /proxies/{proxyId}/health:
+    get:
+      tags:
+        - proxies
+      summary: Проверить здоровье прокси
+      operationId: checkProxyHealth
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProxyIdParam'
+      responses:
+        '200':
+          description: Состояние прокси
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProxyHealth'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /proxies/pool/refresh:
+    post:
+      tags:
+        - proxies
+      summary: Обновить пул прокси
+      description: Докупает прокси до минимального уровня пула
+      operationId: refreshProxyPool
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Пул обновлён
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  purchased:
+                    type: integer
+                    description: Количество докупленных прокси
+                  total:
+                    type: integer
+                    description: Общее количество прокси в пуле
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ==================== Warming ====================
+  /warming/tasks:
+    get:
+      tags:
+        - warming
+      summary: Получить список задач прогрева
+      operationId: listWarmingTasks
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/WarmingStatus'
+        - name: account_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список задач прогрева
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WarmingTask'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - warming
+      summary: Запустить прогрев аккаунта
+      operationId: startWarming
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartWarmingRequest'
+      responses:
+        '201':
+          description: Задача прогрева создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarmingTask'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Прогрев уже запущен для данного аккаунта
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /warming/tasks/{taskId}:
+    get:
+      tags:
+        - warming
+      summary: Получить информацию о задаче прогрева
+      operationId: getWarmingTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        '200':
+          description: Информация о задаче
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarmingTask'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /warming/tasks/{taskId}/pause:
+    post:
+      tags:
+        - warming
+      summary: Приостановить прогрев
+      operationId: pauseWarming
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        '200':
+          description: Прогрев приостановлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarmingTask'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /warming/tasks/{taskId}/resume:
+    post:
+      tags:
+        - warming
+      summary: Возобновить прогрев
+      operationId: resumeWarming
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        '200':
+          description: Прогрев возобновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarmingTask'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /warming/tasks/{taskId}/stop:
+    post:
+      tags:
+        - warming
+      summary: Остановить прогрев
+      operationId: stopWarming
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        '200':
+          description: Прогрев остановлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarmingTask'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /warming/tasks/{taskId}/statistics:
+    get:
+      tags:
+        - warming
+      summary: Получить статистику прогрева
+      operationId: getWarmingStatistics
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        '200':
+          description: Статистика прогрева
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarmingStatistics'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /warming/scenarios:
+    get:
+      tags:
+        - warming
+      summary: Получить список сценариев прогрева
+      operationId: listScenarios
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: platform
+          in: query
+          schema:
+            $ref: '#/components/schemas/Platform'
+      responses:
+        '200':
+          description: Список сценариев
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WarmingScenario'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - warming
+      summary: Создать кастомный сценарий
+      operationId: createScenario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScenarioRequest'
+      responses:
+        '201':
+          description: Сценарий создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarmingScenario'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ==================== SMS ====================
+  /sms/activations:
+    post:
+      tags:
+        - sms
+      summary: Запросить SMS-активацию
+      description: Получает виртуальный номер и ожидает SMS-код
+      operationId: requestSmsActivation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmsActivationRequest'
+      responses:
+        '201':
+          description: Активация запрошена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmsActivation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          description: Нет доступных номеров
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /sms/activations/{activationId}:
+    get:
+      tags:
+        - sms
+      summary: Получить статус активации
+      operationId: getSmsActivation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: activationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Статус активации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmsActivation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /sms/activations/{activationId}/cancel:
+    post:
+      tags:
+        - sms
+      summary: Отменить активацию
+      operationId: cancelSmsActivation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: activationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Активация отменена
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /sms/balance:
+    get:
+      tags:
+        - sms
+      summary: Получить баланс SMS-сервиса
+      operationId: getSmsBalance
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Баланс
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    format: float
+                  currency:
+                    type: string
+                    example: "RUB"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ==================== Analytics ====================
+  /analytics/dashboard:
+    get:
+      tags:
+        - analytics
+      summary: Получить данные дашборда
+      operationId: getDashboard
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Данные дашборда
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /analytics/accounts:
+    get:
+      tags:
+        - analytics
+      summary: Статистика по аккаунтам
+      operationId: getAccountsAnalytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: platform
+          in: query
+          schema:
+            $ref: '#/components/schemas/Platform'
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: week
+      responses:
+        '200':
+          description: Статистика по аккаунтам
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountsAnalytics'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /analytics/proxies:
+    get:
+      tags:
+        - analytics
+      summary: Статистика по прокси
+      operationId: getProxiesAnalytics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Статистика по прокси
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProxiesAnalytics'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT токен, полученный через Telegram бота
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Номер страницы
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    LimitParam:
+      name: limit
+      in: query
+      description: Количество элементов на странице
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    AccountIdParam:
+      name: accountId
+      in: path
+      required: true
+      description: ID аккаунта
+      schema:
+        type: string
+        pattern: '^[a-f0-9]{24}$'
+
+    ProxyIdParam:
+      name: proxyId
+      in: path
+      required: true
+      description: ID прокси
+      schema:
+        type: string
+        pattern: '^[a-f0-9]{24}$'
+
+    TaskIdParam:
+      name: taskId
+      in: path
+      required: true
+      description: ID задачи прогрева
+      schema:
+        type: string
+        pattern: '^[a-f0-9]{24}$'
+
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Не авторизован
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "UNAUTHORIZED"
+            message: "Invalid or expired token"
+
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    TooManyRequests:
+      description: Превышен лимит запросов
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "RATE_LIMIT_EXCEEDED"
+            message: "Too many requests, please try again later"
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+
+    InternalError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Код ошибки
+        message:
+          type: string
+          description: Описание ошибки
+        details:
+          type: object
+          additionalProperties: true
+          description: Дополнительные детали ошибки
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        services:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [up, down]
+              latency_ms:
+                type: integer
+
+    Platform:
+      type: string
+      enum: [vk, telegram, mail, max]
+      description: Поддерживаемые платформы
+
+    # ==================== Account Schemas ====================
+    AccountStatus:
+      type: string
+      enum:
+        - creating
+        - active
+        - warming
+        - banned
+        - suspended
+        - deleted
+      description: Статус аккаунта
+
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+          description: MongoDB ObjectID
+        platform:
+          $ref: '#/components/schemas/Platform'
+        username:
+          type: string
+          description: Имя пользователя на платформе
+        phone:
+          type: string
+          description: Номер телефона (маскированный)
+        status:
+          $ref: '#/components/schemas/AccountStatus'
+        proxy_id:
+          type: string
+          description: ID привязанного прокси
+        warming_status:
+          type: string
+          enum: [not_started, in_progress, completed, paused]
+        warming_progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Прогресс прогрева в процентах
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AccountCredentials:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+        phone:
+          type: string
+
+    CreateAccountRequest:
+      type: object
+      required:
+        - platform
+      properties:
+        platform:
+          $ref: '#/components/schemas/Platform'
+        count:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 1
+          description: Количество аккаунтов для создания
+        start_warming:
+          type: boolean
+          default: false
+          description: Запустить прогрев сразу после создания
+        warming_scenario:
+          type: string
+          description: ID сценария прогрева (если start_warming=true)
+
+    CreateAccountResponse:
+      type: object
+      properties:
+        task_id:
+          type: string
+          description: ID задачи создания
+        status:
+          type: string
+          enum: [pending, in_progress]
+        estimated_time_seconds:
+          type: integer
+          description: Ориентировочное время выполнения
+
+    # ==================== Proxy Schemas ====================
+    ProxyStatus:
+      type: string
+      enum:
+        - available
+        - allocated
+        - checking
+        - banned
+        - expired
+      description: Статус прокси
+
+    Proxy:
+      type: object
+      properties:
+        id:
+          type: string
+        provider:
+          type: string
+          description: Название провайдера
+        host:
+          type: string
+        port:
+          type: integer
+        protocol:
+          type: string
+          enum: [http, https, socks5]
+        country:
+          type: string
+          description: Код страны (ISO 3166-1 alpha-2)
+        status:
+          $ref: '#/components/schemas/ProxyStatus'
+        account_id:
+          type: string
+          nullable: true
+          description: ID аккаунта (если аллоцирован)
+        health:
+          $ref: '#/components/schemas/ProxyHealth'
+        expires_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    ProxyHealth:
+      type: object
+      properties:
+        is_available:
+          type: boolean
+        latency_ms:
+          type: integer
+        fraud_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+        is_vpn:
+          type: boolean
+        last_check:
+          type: string
+          format: date-time
+
+    AllocateProxyRequest:
+      type: object
+      required:
+        - account_id
+      properties:
+        account_id:
+          type: string
+        country:
+          type: string
+          description: Предпочтительная страна
+        provider:
+          type: string
+          description: Предпочтительный провайдер
+
+    # ==================== Warming Schemas ====================
+    WarmingStatus:
+      type: string
+      enum:
+        - pending
+        - running
+        - paused
+        - completed
+        - failed
+      description: Статус задачи прогрева
+
+    WarmingTask:
+      type: object
+      properties:
+        id:
+          type: string
+        account_id:
+          type: string
+        platform:
+          $ref: '#/components/schemas/Platform'
+        scenario_id:
+          type: string
+        status:
+          $ref: '#/components/schemas/WarmingStatus'
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        current_day:
+          type: integer
+        total_days:
+          type: integer
+        actions_completed:
+          type: integer
+        actions_failed:
+          type: integer
+        next_action_at:
+          type: string
+          format: date-time
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        error:
+          type: string
+          nullable: true
+
+    WarmingStatistics:
+      type: object
+      properties:
+        task_id:
+          type: string
+        total_actions:
+          type: integer
+        successful_actions:
+          type: integer
+        failed_actions:
+          type: integer
+        actions_by_type:
+          type: object
+          additionalProperties:
+            type: integer
+        errors_by_type:
+          type: object
+          additionalProperties:
+            type: integer
+        average_delay_seconds:
+          type: number
+        total_duration_seconds:
+          type: integer
+
+    WarmingScenario:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        platform:
+          $ref: '#/components/schemas/Platform'
+        type:
+          type: string
+          enum: [basic, advanced, custom]
+        duration_days:
+          type: integer
+        daily_actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyActionPlan'
+        is_default:
+          type: boolean
+
+    DailyActionPlan:
+      type: object
+      properties:
+        day:
+          type: integer
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WarmingAction'
+
+    WarmingAction:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - view_profile
+            - like_post
+            - subscribe
+            - comment
+            - send_message
+            - repost
+            - view_stories
+            - add_friend
+        count:
+          type: integer
+          minimum: 1
+        weight:
+          type: number
+          format: float
+          description: Вероятность выполнения действия
+
+    StartWarmingRequest:
+      type: object
+      required:
+        - account_id
+      properties:
+        account_id:
+          type: string
+        scenario_id:
+          type: string
+          description: ID сценария (по умолчанию - basic)
+        duration_days:
+          type: integer
+          minimum: 1
+          maximum: 30
+          description: Переопределение длительности сценария
+
+    CreateScenarioRequest:
+      type: object
+      required:
+        - name
+        - platform
+        - daily_actions
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        platform:
+          $ref: '#/components/schemas/Platform'
+        daily_actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyActionPlan'
+
+    # ==================== SMS Schemas ====================
+    SmsActivationRequest:
+      type: object
+      required:
+        - service
+      properties:
+        service:
+          type: string
+          enum: [vk, telegram, mail, max]
+          description: Сервис для активации
+        country:
+          type: string
+          default: "ru"
+          description: Код страны
+
+    SmsActivation:
+      type: object
+      properties:
+        id:
+          type: string
+        phone:
+          type: string
+          description: Виртуальный номер телефона
+        service:
+          type: string
+        status:
+          type: string
+          enum:
+            - pending
+            - waiting_code
+            - code_received
+            - completed
+            - cancelled
+            - failed
+        code:
+          type: string
+          nullable: true
+          description: Полученный SMS-код
+        attempts:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+
+    # ==================== Analytics Schemas ====================
+    DashboardData:
+      type: object
+      properties:
+        accounts:
+          type: object
+          properties:
+            total:
+              type: integer
+            by_platform:
+              type: object
+              additionalProperties:
+                type: integer
+            by_status:
+              type: object
+              additionalProperties:
+                type: integer
+            created_today:
+              type: integer
+        proxies:
+          type: object
+          properties:
+            total:
+              type: integer
+            available:
+              type: integer
+            allocated:
+              type: integer
+            banned:
+              type: integer
+        warming:
+          type: object
+          properties:
+            active_tasks:
+              type: integer
+            completed_today:
+              type: integer
+            success_rate:
+              type: number
+              format: float
+
+    AccountsAnalytics:
+      type: object
+      properties:
+        period:
+          type: string
+        created:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              count:
+                type: integer
+        banned:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              count:
+                type: integer
+        by_platform:
+          type: object
+          additionalProperties:
+            type: integer
+
+    ProxiesAnalytics:
+      type: object
+      properties:
+        by_provider:
+          type: object
+          additionalProperties:
+            type: integer
+        by_country:
+          type: object
+          additionalProperties:
+            type: integer
+        health_statistics:
+          type: object
+          properties:
+            average_latency_ms:
+              type: number
+            average_fraud_score:
+              type: number
+            availability_rate:
+              type: number
+        rotation_count_24h:
+          type: integer
+        banned_count_24h:
+          type: integer
+

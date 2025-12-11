@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+package max;
+
+option go_package = "github.com/conveer/max-service/proto";
+
+// MaxService provides VK Messenger Max account management
+service MaxService {
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc GetAccount(GetAccountRequest) returns (Account);
+  rpc ListAccounts(ListAccountsRequest) returns (AccountList);
+  rpc UpdateAccountStatus(UpdateAccountStatusRequest) returns (UpdateAccountStatusResponse);
+  rpc RetryRegistration(RetryRegistrationRequest) returns (RetryRegistrationResponse);
+  rpc LinkVKAccount(LinkVKAccountRequest) returns (LinkVKAccountResponse);
+  rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse);
+  rpc GetStatistics(GetStatisticsRequest) returns (Statistics);
+}
+
+// CreateAccountRequest represents a request to create an account
+message CreateAccountRequest {
+  string vk_account_id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string username = 4;
+  string avatar_url = 5;
+  string preferred_country = 6;
+  bool create_new_vk_account = 7;
+}
+
+// CreateAccountResponse represents the response to account creation
+message CreateAccountResponse {
+  bool success = 1;
+  string account_id = 2;
+  string status = 3;
+  string error_message = 4;
+}
+
+// GetAccountRequest represents a request to get an account
+message GetAccountRequest {
+  string account_id = 1;
+}
+
+// Account represents a max account
+message Account {
+  string id = 1;
+  string vk_account_id = 2;
+  string vk_user_id = 3;
+  string first_name = 4;
+  string last_name = 5;
+  string username = 6;
+  string avatar_url = 7;
+  string status = 8;
+  string phone = 9;
+  bool is_vk_linked = 10;
+  int64 created_at = 11;
+  int64 updated_at = 12;
+  string error_message = 13;
+  int32 retry_count = 14;
+}
+
+// ListAccountsRequest represents a request to list accounts
+message ListAccountsRequest {
+  string status = 1;
+  bool vk_linked_only = 2;
+  int32 limit = 3;
+  int32 offset = 4;
+}
+
+// AccountList represents a list of accounts
+message AccountList {
+  repeated Account accounts = 1;
+  int64 total = 2;
+}
+
+// UpdateAccountStatusRequest represents a request to update account status
+message UpdateAccountStatusRequest {
+  string account_id = 1;
+  string status = 2;
+  string error_message = 3;
+}
+
+// UpdateAccountStatusResponse represents the response to status update
+message UpdateAccountStatusResponse {
+  bool success = 1;
+}
+
+// RetryRegistrationRequest represents a request to retry registration
+message RetryRegistrationRequest {
+  string account_id = 1;
+}
+
+// RetryRegistrationResponse represents the response to retry request
+message RetryRegistrationResponse {
+  bool success = 1;
+}
+
+// LinkVKAccountRequest represents a request to link VK account
+message LinkVKAccountRequest {
+  string max_account_id = 1;
+  string vk_account_id = 2;
+}
+
+// LinkVKAccountResponse represents the response to link request
+message LinkVKAccountResponse {
+  bool success = 1;
+}
+
+// DeleteAccountRequest represents a request to delete an account
+message DeleteAccountRequest {
+  string account_id = 1;
+}
+
+// DeleteAccountResponse represents the response to delete request
+message DeleteAccountResponse {
+  bool success = 1;
+}
+
+// GetStatisticsRequest represents a request to get statistics
+message GetStatisticsRequest {}
+
+// Statistics represents service statistics
+message Statistics {
+  int64 total_accounts = 1;
+  map<string, int64> accounts_by_status = 2;
+  float success_rate = 3;
+  float average_retries = 4;
+  int64 vk_linked_count = 5;
+  int64 last_hour = 6;
+  int64 last_24_hours = 7;
+}

@@ -1,0 +1,101 @@
+# Development Configuration
+# This file contains settings optimized for local development
+
+environment: development
+
+server:
+  http_port: 8080
+  grpc_port: 50051
+  read_timeout: 30s
+  write_timeout: 30s
+  shutdown_timeout: 10s
+
+mongodb:
+  uri: mongodb://admin:password@localhost:27017/conveer?authSource=admin
+  database: conveer
+  connect_timeout: 10s
+  max_pool_size: 10
+
+redis:
+  addr: localhost:6379
+  password: ""
+  db: 0
+  pool_size: 10
+
+rabbitmq:
+  url: amqp://guest:guest@localhost:5672/
+  prefetch_count: 10
+  reconnect_delay: 5s
+
+logging:
+  level: debug
+  format: text  # json in production
+  output: stdout
+
+# Proxy Service Configuration
+proxy:
+  pool:
+    min_size: 5
+    max_size: 50
+  health_check:
+    interval: 5m
+    timeout: 10s
+    max_fraud_score: 80  # More lenient in dev
+  rotation:
+    before_expiry: 24h
+    check_interval: 1h
+  providers:
+    - name: mock
+      enabled: true
+      api_url: http://localhost:9999/mock
+      auth_type: none
+    - name: brightdata
+      enabled: false
+      api_url: https://api.brightdata.com
+      auth_type: bearer
+
+# SMS Service Configuration
+sms:
+  code_timeout: 120s
+  max_retries: 3
+  retry_backoff: 30s  # Shorter in dev
+  providers:
+    - name: mock
+      enabled: true
+      api_url: http://localhost:9999/mock
+      priority: 1
+    - name: sms-activate
+      enabled: false
+      api_url: https://api.sms-activate.org/stubs/handler_api.php
+      priority: 2
+
+# Warming Service Configuration
+warming:
+  max_parallel_tasks: 10  # Lower in dev
+  default_scenario: basic
+  active_hours:
+    start: 0   # No restrictions in dev
+    end: 24
+  behavior:
+    min_delay: 1s   # Faster in dev
+    max_delay: 5s
+    skip_night_hours: false
+    skip_weekends: false
+
+# IPQS Configuration
+ipqs:
+  enabled: false  # Disable in dev to save API calls
+  api_url: https://ipqualityscore.com/api
+  timeout: 5s
+
+# Telegram Bot Configuration
+telegram:
+  polling_timeout: 60s
+  rate_limit: 30  # messages per second
+
+# Metrics
+metrics:
+  enabled: true
+  path: /metrics
+  port: 9090
+

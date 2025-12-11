@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package telegram;
+
+option go_package = "conveer/services/telegram-service/proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service TelegramService {
+  rpc CreateAccount(CreateAccountRequest) returns (Account);
+  rpc GetAccount(GetAccountRequest) returns (Account);
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
+  rpc UpdateAccountStatus(UpdateStatusRequest) returns (Account);
+  rpc RetryRegistration(RetryRequest) returns (Account);
+  rpc DeleteAccount(DeleteAccountRequest) returns (google.protobuf.Empty);
+  rpc GetStatistics(google.protobuf.Empty) returns (Statistics);
+}
+
+message CreateAccountRequest {
+  string first_name = 1;
+  string last_name = 2;
+  string username = 3;
+  string bio = 4;
+  string avatar_url = 5;
+  bool enable_two_factor = 6;
+  string preferred_country = 7;
+  bool use_random_profile = 8;
+  int32 api_id = 9;
+  string api_hash = 10;
+}
+
+message GetAccountRequest {
+  string account_id = 1;
+}
+
+message ListAccountsRequest {
+  string status = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message UpdateStatusRequest {
+  string account_id = 1;
+  string status = 2;
+}
+
+message RetryRequest {
+  string account_id = 1;
+}
+
+message DeleteAccountRequest {
+  string account_id = 1;
+}
+
+message Account {
+  string id = 1;
+  string phone = 2;
+  string first_name = 3;
+  string last_name = 4;
+  string username = 5;
+  string user_id = 6;
+  string bio = 7;
+  string avatar_url = 8;
+  string status = 9;
+  string proxy_id = 10;
+  string activation_id = 11;
+  string user_agent = 12;
+  map<string, string> fingerprint = 13;
+  string registration_ip = 14;
+  google.protobuf.Timestamp created_at = 15;
+  google.protobuf.Timestamp updated_at = 16;
+  google.protobuf.Timestamp last_login_at = 17;
+  string error_message = 18;
+  int32 retry_count = 19;
+  bool has_two_factor = 20;
+}
+
+message ListAccountsResponse {
+  repeated Account accounts = 1;
+  int32 total = 2;
+  int32 offset = 3;
+  int32 limit = 4;
+}
+
+message Statistics {
+  int64 total = 1;
+  map<string, int64> by_status = 2;
+  double success_rate = 3;
+  double average_retries = 4;
+  int64 last_hour = 5;
+  int64 last_24_hours = 6;
+}

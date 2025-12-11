@@ -1,0 +1,106 @@
+# Staging Configuration
+# This file contains settings for staging/testing environment
+
+environment: staging
+
+server:
+  http_port: 8080
+  grpc_port: 50051
+  read_timeout: 30s
+  write_timeout: 30s
+  shutdown_timeout: 30s
+
+mongodb:
+  # Use environment variable: ${MONGODB_URI}
+  database: conveer_staging
+  connect_timeout: 10s
+  max_pool_size: 50
+
+redis:
+  # Use environment variable: ${REDIS_ADDR}
+  db: 0
+  pool_size: 50
+
+rabbitmq:
+  # Use environment variable: ${RABBITMQ_URL}
+  prefetch_count: 50
+  reconnect_delay: 5s
+
+logging:
+  level: info
+  format: json
+  output: stdout
+
+# Proxy Service Configuration
+proxy:
+  pool:
+    min_size: 20
+    max_size: 100
+  health_check:
+    interval: 10m
+    timeout: 15s
+    max_fraud_score: 70
+  rotation:
+    before_expiry: 24h
+    check_interval: 1h
+  providers:
+    - name: brightdata
+      enabled: true
+      api_url: https://api.brightdata.com
+      auth_type: bearer
+    - name: smartproxy
+      enabled: true
+      api_url: https://api.smartproxy.com
+      auth_type: api_key
+
+# SMS Service Configuration
+sms:
+  code_timeout: 180s
+  max_retries: 4
+  retry_backoff: 60s
+  providers:
+    - name: sms-activate
+      enabled: true
+      api_url: https://api.sms-activate.org/stubs/handler_api.php
+      priority: 1
+    - name: 5sim
+      enabled: true
+      api_url: https://5sim.net/v1
+      priority: 2
+
+# Warming Service Configuration
+warming:
+  max_parallel_tasks: 50
+  default_scenario: basic
+  active_hours:
+    start: 8
+    end: 23
+  behavior:
+    min_delay: 30s
+    max_delay: 300s
+    skip_night_hours: true
+    skip_weekends: false
+
+# IPQS Configuration
+ipqs:
+  enabled: true
+  api_url: https://ipqualityscore.com/api
+  timeout: 10s
+
+# Telegram Bot Configuration
+telegram:
+  polling_timeout: 60s
+  rate_limit: 20
+
+# Metrics
+metrics:
+  enabled: true
+  path: /metrics
+  port: 9090
+
+# Alerting
+alerting:
+  enabled: true
+  slack_webhook: ""  # Optional
+  email: ""          # Optional
+

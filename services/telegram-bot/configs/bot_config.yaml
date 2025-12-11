@@ -1,0 +1,23 @@
+bot_token: "${TELEGRAM_BOT_TOKEN}"
+mode: "long_polling"
+webhook_url: ""
+mongo_uri: "${MONGO_URI}"
+database_name: "${DATABASE_NAME}"
+rabbitmq_url: "${RABBITMQ_URL}"
+log_level: "${LOG_LEVEL}"
+admin_telegram_ids:
+  - 123456789
+
+grpc_services:
+  vk: "${VK_SERVICE_URL}"
+  telegram: "${TELEGRAM_SERVICE_URL}"
+  mail: "${MAIL_SERVICE_URL}"
+  max: "${MAX_SERVICE_URL}"
+  warming: "${WARMING_SERVICE_URL}"
+  proxy: "${PROXY_SERVICE_URL}"
+  sms: "${SMS_SERVICE_URL}"
+
+features:
+  enable_grafana_integration: false
+  grafana_url: "http://grafana:3000"
+  grafana_api_key: "${GRAFANA_API_KEY}"

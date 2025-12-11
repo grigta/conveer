@@ -1,0 +1,451 @@
+warming:
+  scheduler:
+    check_interval: 5m
+    max_concurrent_tasks: 50
+    action_timeout: 5m
+
+  behavior_simulation:
+    enable_random_delays: true
+    delay_min_seconds: 30
+    delay_max_seconds: 300
+    active_hours_start: 8
+    active_hours_end: 23
+    weekend_activity_reduction: 0.7
+    night_pause_probability: 0.9
+
+  scenarios:
+    basic:
+      vk:
+        duration_14_30:
+          days_1_7:
+            actions_per_day: 5-10
+            actions:
+              - type: view_profile
+                weight: 30
+              - type: view_feed
+                weight: 40
+              - type: like_post
+                weight: 20
+              - type: subscribe_group
+                weight: 10
+          days_8_14:
+            actions_per_day: 10-15
+            actions:
+              - type: view_profile
+                weight: 20
+              - type: view_feed
+                weight: 30
+              - type: like_post
+                weight: 30
+              - type: subscribe_group
+                weight: 15
+              - type: comment_post
+                weight: 5
+          days_15_30:
+            actions_per_day: 15-25
+            actions:
+              - type: view_profile
+                weight: 15
+              - type: view_feed
+                weight: 25
+              - type: like_post
+                weight: 35
+              - type: subscribe_group
+                weight: 10
+              - type: comment_post
+                weight: 10
+              - type: send_message
+                weight: 5
+                params:
+                  max_per_day: 2
+        duration_30_60:
+          days_1_7:
+            actions_per_day: 3-5
+            actions:
+              - type: view_profile
+                weight: 40
+              - type: view_feed
+                weight: 50
+              - type: like_post
+                weight: 10
+          days_8_14:
+            actions_per_day: 5-8
+            actions:
+              - type: view_profile
+                weight: 30
+              - type: view_feed
+                weight: 35
+              - type: like_post
+                weight: 20
+              - type: subscribe_group
+                weight: 15
+          days_15_30:
+            actions_per_day: 8-12
+            actions:
+              - type: view_profile
+                weight: 20
+              - type: view_feed
+                weight: 30
+              - type: like_post
+                weight: 25
+              - type: subscribe_group
+                weight: 15
+              - type: comment_post
+                weight: 10
+          days_31_60:
+            actions_per_day: 12-20
+            actions:
+              - type: view_profile
+                weight: 15
+              - type: view_feed
+                weight: 25
+              - type: like_post
+                weight: 30
+              - type: subscribe_group
+                weight: 10
+              - type: comment_post
+                weight: 15
+              - type: send_message
+                weight: 5
+                params:
+                  max_per_day: 3
+
+      telegram:
+        duration_14_30:
+          days_1_7:
+            actions_per_day: 3-5
+            actions:
+              - type: read_channel
+                weight: 50
+              - type: react_message
+                weight: 30
+              - type: join_group
+                weight: 20
+                params:
+                  max_per_day: 1
+          days_8_14:
+            actions_per_day: 5-10
+            actions:
+              - type: read_channel
+                weight: 30
+              - type: react_message
+                weight: 30
+              - type: join_group
+                weight: 15
+                params:
+                  max_per_day: 2
+              - type: send_message
+                weight: 15
+                params:
+                  max_per_day: 3
+              - type: comment_post
+                weight: 10
+          days_15_30:
+            actions_per_day: 10-20
+            actions:
+              - type: read_channel
+                weight: 25
+              - type: react_message
+                weight: 25
+              - type: join_group
+                weight: 10
+                params:
+                  max_per_day: 3
+              - type: send_message
+                weight: 20
+                params:
+                  max_per_day: 5
+              - type: comment_post
+                weight: 15
+              - type: create_channel_post
+                weight: 5
+        duration_30_60:
+          days_1_7:
+            actions_per_day: 2-3
+            actions:
+              - type: read_channel
+                weight: 60
+              - type: react_message
+                weight: 40
+          days_8_14:
+            actions_per_day: 3-5
+            actions:
+              - type: read_channel
+                weight: 40
+              - type: react_message
+                weight: 35
+              - type: join_group
+                weight: 25
+                params:
+                  max_per_day: 1
+          days_15_30:
+            actions_per_day: 5-8
+            actions:
+              - type: read_channel
+                weight: 30
+              - type: react_message
+                weight: 30
+              - type: join_group
+                weight: 15
+                params:
+                  max_per_day: 2
+              - type: send_message
+                weight: 15
+                params:
+                  max_per_day: 3
+              - type: comment_post
+                weight: 10
+          days_31_60:
+            actions_per_day: 8-15
+            actions:
+              - type: read_channel
+                weight: 20
+              - type: react_message
+                weight: 25
+              - type: join_group
+                weight: 10
+                params:
+                  max_per_day: 3
+              - type: send_message
+                weight: 20
+                params:
+                  max_per_day: 5
+              - type: comment_post
+                weight: 20
+              - type: create_channel_post
+                weight: 5
+
+      mail:
+        duration_14_30:
+          days_1_7:
+            actions_per_day: 5-8
+            actions:
+              - type: read_email
+                weight: 50
+              - type: mark_spam
+                weight: 20
+              - type: create_folder
+                weight: 10
+              - type: move_email
+                weight: 20
+          days_8_14:
+            actions_per_day: 8-12
+            actions:
+              - type: read_email
+                weight: 40
+              - type: send_email
+                weight: 20
+                params:
+                  max_per_day: 2
+              - type: mark_spam
+                weight: 15
+              - type: create_folder
+                weight: 5
+              - type: move_email
+                weight: 20
+          days_15_30:
+            actions_per_day: 12-20
+            actions:
+              - type: read_email
+                weight: 35
+              - type: send_email
+                weight: 30
+                params:
+                  max_per_day: 5
+              - type: mark_spam
+                weight: 10
+              - type: create_folder
+                weight: 5
+              - type: move_email
+                weight: 20
+
+      max:
+        duration_14_30:
+          days_1_7:
+            actions_per_day: 5-10
+            actions:
+              - type: read_messages
+                weight: 50
+              - type: update_status
+                weight: 30
+              - type: create_chat
+                weight: 20
+                params:
+                  max_per_day: 1
+          days_8_14:
+            actions_per_day: 10-15
+            actions:
+              - type: read_messages
+                weight: 35
+              - type: send_message
+                weight: 30
+                params:
+                  max_per_day: 5
+              - type: update_status
+                weight: 20
+              - type: create_chat
+                weight: 15
+                params:
+                  max_per_day: 2
+          days_15_30:
+            actions_per_day: 15-25
+            actions:
+              - type: read_messages
+                weight: 30
+              - type: send_message
+                weight: 40
+                params:
+                  max_per_day: 10
+              - type: update_status
+                weight: 15
+              - type: create_chat
+                weight: 15
+                params:
+                  max_per_day: 3
+
+    advanced:
+      vk:
+        duration_30_60:
+          days_1_7:
+            actions_per_day: 5-8
+            actions:
+              - type: view_profile
+                weight: 30
+              - type: view_feed
+                weight: 35
+              - type: like_post
+                weight: 20
+              - type: subscribe_group
+                weight: 15
+          days_8_14:
+            actions_per_day: 8-12
+            actions:
+              - type: view_profile
+                weight: 20
+              - type: view_feed
+                weight: 25
+              - type: like_post
+                weight: 25
+              - type: subscribe_group
+                weight: 15
+              - type: comment_post
+                weight: 10
+              - type: send_message
+                weight: 5
+                params:
+                  max_per_day: 2
+          days_15_30:
+            actions_per_day: 12-18
+            actions:
+              - type: view_profile
+                weight: 15
+              - type: view_feed
+                weight: 20
+              - type: like_post
+                weight: 25
+              - type: subscribe_group
+                weight: 10
+              - type: comment_post
+                weight: 15
+              - type: send_message
+                weight: 10
+                params:
+                  max_per_day: 5
+              - type: create_post
+                weight: 5
+                params:
+                  max_per_day: 1
+          days_31_60:
+            actions_per_day: 15-25
+            actions:
+              - type: view_profile
+                weight: 10
+              - type: view_feed
+                weight: 15
+              - type: like_post
+                weight: 25
+              - type: subscribe_group
+                weight: 10
+              - type: comment_post
+                weight: 20
+              - type: send_message
+                weight: 10
+                params:
+                  max_per_day: 7
+              - type: create_post
+                weight: 10
+                params:
+                  max_per_day: 2
+
+      telegram:
+        duration_30_60:
+          days_1_7:
+            actions_per_day: 3-5
+            actions:
+              - type: read_channel
+                weight: 50
+              - type: react_message
+                weight: 35
+              - type: join_group
+                weight: 15
+                params:
+                  max_per_day: 1
+          days_8_14:
+            actions_per_day: 5-8
+            actions:
+              - type: read_channel
+                weight: 30
+              - type: react_message
+                weight: 30
+              - type: join_group
+                weight: 15
+                params:
+                  max_per_day: 2
+              - type: comment_post
+                weight: 15
+              - type: send_message
+                weight: 10
+                params:
+                  max_per_day: 2
+          days_15_30:
+            actions_per_day: 8-12
+            actions:
+              - type: read_channel
+                weight: 20
+              - type: react_message
+                weight: 20
+              - type: join_group
+                weight: 10
+                params:
+                  max_per_day: 3
+              - type: comment_post
+                weight: 20
+              - type: send_message
+                weight: 20
+                params:
+                  max_per_day: 5
+              - type: create_channel_post
+                weight: 10
+                params:
+                  max_per_day: 1
+          days_31_60:
+            actions_per_day: 12-20
+            actions:
+              - type: read_channel
+                weight: 15
+              - type: react_message
+                weight: 15
+              - type: join_group
+                weight: 10
+                params:
+                  max_per_day: 4
+              - type: comment_post
+                weight: 20
+              - type: send_message
+                weight: 25
+                params:
+                  max_per_day: 10
+              - type: create_channel_post
+                weight: 15
+                params:
+                  max_per_day: 2

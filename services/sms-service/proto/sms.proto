@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package sms;
+
+option go_package = "conveer/sms-service/proto;pb";
+
+service SMSService {
+  rpc PurchaseNumber(PurchaseNumberRequest) returns (PurchaseNumberResponse);
+  rpc GetSMSCode(GetSMSCodeRequest) returns (GetSMSCodeResponse);
+  rpc CancelActivation(CancelActivationRequest) returns (CancelActivationResponse);
+  rpc GetActivationStatus(GetActivationStatusRequest) returns (GetActivationStatusResponse);
+  rpc GetStatistics(GetStatisticsRequest) returns (GetStatisticsResponse);
+  rpc GetProviderBalance(GetProviderBalanceRequest) returns (GetProviderBalanceResponse);
+}
+
+message PurchaseNumberRequest {
+  string user_id = 1;
+  string service = 2;
+  string country = 3;
+  string operator = 4;
+  string provider = 5;
+  int32 max_price = 6;
+}
+
+message PurchaseNumberResponse {
+  string activation_id = 1;
+  string phone_number = 2;
+  string country_code = 3;
+  float price = 4;
+  string provider = 5;
+  int64 expires_at = 6;
+}
+
+message GetSMSCodeRequest {
+  string activation_id = 1;
+  string user_id = 2;
+}
+
+message GetSMSCodeResponse {
+  string code = 1;
+  string full_sms = 2;
+  int64 received_at = 3;
+}
+
+message CancelActivationRequest {
+  string activation_id = 1;
+  string user_id = 2;
+  string reason = 3;
+}
+
+message CancelActivationResponse {
+  bool success = 1;
+  bool refunded = 2;
+  float refund_amount = 3;
+}
+
+message GetActivationStatusRequest {
+  string activation_id = 1;
+  string user_id = 2;
+}
+
+message GetActivationStatusResponse {
+  string activation_id = 1;
+  string status = 2;
+  string phone_number = 3;
+  string service = 4;
+  string code = 5;
+  int64 created_at = 6;
+  int64 expires_at = 7;
+  int64 completed_at = 8;
+}
+
+message GetStatisticsRequest {
+  string user_id = 1;
+  int64 from_date = 2;
+  int64 to_date = 3;
+  string service = 4;
+  string country = 5;
+}
+
+message GetStatisticsResponse {
+  int32 total_activations = 1;
+  int32 successful_activations = 2;
+  int32 failed_activations = 3;
+  int32 cancelled_activations = 4;
+  float total_spent = 5;
+  float average_price = 6;
+  map<string, int32> by_service = 7;
+  map<string, int32> by_country = 8;
+  map<string, float> by_provider = 9;
+}
+
+message GetProviderBalanceRequest {
+  string provider = 1;
+}
+
+message GetProviderBalanceResponse {
+  string provider = 1;
+  float balance = 2;
+  string currency = 3;
+  int64 updated_at = 4;
+}

@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package proxy;
+
+option go_package = "conveer/services/proxy-service/proto;proto";
+
+service ProxyService {
+    rpc AllocateProxy(AllocateProxyRequest) returns (ProxyResponse);
+    rpc ReleaseProxy(ReleaseProxyRequest) returns (ReleaseProxyResponse);
+    rpc GetProxyForAccount(GetProxyRequest) returns (ProxyResponse);
+    rpc GetProxyHealth(GetProxyHealthRequest) returns (ProxyHealthResponse);
+    rpc RotateProxy(RotateProxyRequest) returns (ProxyResponse);
+    rpc GetProxyStatistics(GetStatisticsRequest) returns (ProxyStatisticsResponse);
+    rpc GetProviderStatistics(GetProviderStatisticsRequest) returns (ProviderStatisticsResponse);
+}
+
+message AllocateProxyRequest {
+    string account_id = 1;
+    string type = 2;
+    string country = 3;
+    string protocol = 4;
+}
+
+message ReleaseProxyRequest {
+    string account_id = 1;
+}
+
+message ReleaseProxyResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message GetProxyRequest {
+    string account_id = 1;
+}
+
+message GetProxyHealthRequest {
+    string proxy_id = 1;
+}
+
+message RotateProxyRequest {
+    string account_id = 1;
+}
+
+message GetStatisticsRequest {
+}
+
+message ProxyResponse {
+    string id = 1;
+    string ip = 2;
+    int32 port = 3;
+    string username = 4;
+    string password = 5;
+    string protocol = 6;
+    string type = 7;
+    string country = 8;
+    string city = 9;
+    string status = 10;
+    int64 expires_at = 11;
+    string provider = 12;
+}
+
+message ProxyHealthResponse {
+    string proxy_id = 1;
+    int32 latency = 2;
+    double fraud_score = 3;
+    bool is_vpn = 4;
+    bool is_proxy = 5;
+    bool is_tor = 6;
+    bool blacklist_status = 7;
+    int64 last_check = 8;
+    int32 failed_checks = 9;
+}
+
+message ProxyStatisticsResponse {
+    int64 total_proxies = 1;
+    int64 active_proxies = 2;
+    int64 expired_proxies = 3;
+    int64 banned_proxies = 4;
+    int64 total_bindings = 5;
+    map<string, int64> proxies_by_type = 6;
+    map<string, int64> proxies_by_country = 7;
+    double avg_fraud_score = 8;
+    double avg_latency = 9;
+}
+
+message GetProviderStatisticsRequest {
+    int32 days = 1; // Number of days to look back (default 7)
+}
+
+message ProviderStatisticsResponse {
+    repeated ProviderStats provider_stats = 1;
+}
+
+message ProviderStats {
+    string provider = 1;
+    int64 active_proxies = 2;
+    int64 banned_proxies = 3;
+    double avg_latency = 4;
+    double cost_per_proxy = 5;
+    double success_rate = 6;
+    double ban_rate = 7;
+    int64 total_proxies = 8;
+}

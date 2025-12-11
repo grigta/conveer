@@ -2,71 +2,251 @@ name: CD
 
 on:
   push:
-    branches: [main, master]
     tags:
-      - 'v*'
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      version:
+        description: "Version to deploy (e.g., v1.0.0)"
+        required: true
+        type: string
+
+env:
+  GO_VERSION: "1.21"
+  HELM_VERSION: "3.13.0"
 
 jobs:
-  deploy:
+  # ==================== Build Release ====================
+  build-release:
+    name: Build Release
     runs-on: ubuntu-latest
-    
-    # Only run on main/master branch, not on PRs
-    if: github.event_name == 'push'
-    
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
+          fetch-depth: 0
 
-      - name: Install dependencies
-        run: npm ci
-        continue-on-error: true
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Build for production
-        run: npm run build
-        continue-on-error: true
-        env:
-          NODE_ENV: production
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
 
-      # Uncomment and configure for your deployment target
-      
-      # Deploy to GitHub Pages
-      # - name: Deploy to GitHub Pages
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./dist
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      # Deploy to Vercel
-      # - name: Deploy to Vercel
-      #   uses: amondnet/vercel-action@v25
-      #   with:
-      #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
-      #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-      #     vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-      #     vercel-args: '--prod'
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Deployment notification
-        run: echo "Deployment triggered for ${{ github.ref }}"
+      - name: Build and push all services
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          SERVICES="api-gateway proxy-service sms-service warming-service vk-service telegram-service telegram-bot"
+          
+          for SERVICE in $SERVICES; do
+            echo "Building $SERVICE:$VERSION"
+            docker buildx build \
+              --platform linux/amd64,linux/arm64 \
+              --file ./services/$SERVICE/Dockerfile \
+              --tag conveer/$SERVICE:$VERSION \
+              --tag conveer/$SERVICE:latest \
+              --push \
+              .
+          done
 
-  # Release job - creates GitHub release on tag push
-  release:
+  # ==================== Deploy Staging ====================
+  deploy-staging:
+    name: Deploy to Staging
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    
+    needs: [build-release]
+    if: |
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment:
+      name: staging
+      url: https://staging.conveer.example.com
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create Release
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v4
+        with:
+          kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
+
+      - name: Deploy to Staging
+        run: |
+          VERSION=${{ needs.build-release.outputs.version }}
+          
+          helm upgrade --install conveer ./deploy/helm/conveer \
+            --namespace conveer-staging \
+            --create-namespace \
+            -f ./deploy/helm/conveer/values-staging.yaml \
+            --set global.image.tag=$VERSION \
+            --set mongodb.auth.password=${{ secrets.MONGODB_PASSWORD_STAGING }} \
+            --set redis.auth.password=${{ secrets.REDIS_PASSWORD_STAGING }} \
+            --set rabbitmq.auth.password=${{ secrets.RABBITMQ_PASSWORD_STAGING }} \
+            --set secrets.encryptionKey=${{ secrets.ENCRYPTION_KEY_STAGING }} \
+            --set secrets.telegramBotToken=${{ secrets.TELEGRAM_BOT_TOKEN_STAGING }} \
+            --set secrets.smsActivateApiKey=${{ secrets.SMS_ACTIVATE_API_KEY_STAGING }} \
+            --wait \
+            --timeout 10m
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/api-gateway -n conveer-staging --timeout=5m
+          kubectl rollout status deployment/proxy-service -n conveer-staging --timeout=5m
+          kubectl rollout status deployment/warming-service -n conveer-staging --timeout=5m
+
+      - name: Run smoke tests
+        run: |
+          API_URL="https://staging-api.conveer.example.com"
+          
+          # Health check
+          curl -sf "$API_URL/health" || exit 1
+          
+          # Version check
+          DEPLOYED_VERSION=$(curl -sf "$API_URL/version" | jq -r '.version')
+          if [ "$DEPLOYED_VERSION" != "${{ needs.build-release.outputs.version }}" ]; then
+            echo "Version mismatch: expected ${{ needs.build-release.outputs.version }}, got $DEPLOYED_VERSION"
+            exit 1
+          fi
+          
+          echo "Smoke tests passed!"
+
+  # ==================== Deploy Production ====================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-release, deploy-staging]
+    if: |
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    environment:
+      name: production
+      url: https://api.conveer.example.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v4
+        with:
+          kubeconfig: ${{ secrets.KUBE_CONFIG_PROD }}
+
+      - name: Create deployment annotation
+        run: |
+          echo "Deploying version ${{ needs.build-release.outputs.version }} to production"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Commit: ${{ github.sha }}"
+
+      - name: Deploy to Production
+        run: |
+          VERSION=${{ needs.build-release.outputs.version }}
+          
+          helm upgrade --install conveer ./deploy/helm/conveer \
+            --namespace conveer-prod \
+            --create-namespace \
+            -f ./deploy/helm/conveer/values-prod.yaml \
+            --set global.image.tag=$VERSION \
+            --set mongodb.auth.password=${{ secrets.MONGODB_PASSWORD_PROD }} \
+            --set redis.auth.password=${{ secrets.REDIS_PASSWORD_PROD }} \
+            --set rabbitmq.auth.password=${{ secrets.RABBITMQ_PASSWORD_PROD }} \
+            --set secrets.encryptionKey=${{ secrets.ENCRYPTION_KEY_PROD }} \
+            --set secrets.telegramBotToken=${{ secrets.TELEGRAM_BOT_TOKEN_PROD }} \
+            --set secrets.smsActivateApiKey=${{ secrets.SMS_ACTIVATE_API_KEY_PROD }} \
+            --set secrets.ipqsApiKey=${{ secrets.IPQS_API_KEY_PROD }} \
+            --wait \
+            --timeout 15m
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/api-gateway -n conveer-prod --timeout=5m
+          kubectl rollout status deployment/proxy-service -n conveer-prod --timeout=5m
+          kubectl rollout status deployment/warming-service -n conveer-prod --timeout=5m
+
+      - name: Run production smoke tests
+        run: |
+          API_URL="https://api.conveer.example.com"
+          
+          # Health check
+          curl -sf "$API_URL/health" || exit 1
+          
+          echo "Production smoke tests passed!"
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
+        if: github.event_name == 'push'
         with:
-          generate_release_notes: true
+          name: Release ${{ needs.build-release.outputs.version }}
+          body: |
+            ## Changes in ${{ needs.build-release.outputs.version }}
+            
+            See [CHANGELOG.md](./CHANGELOG.md) for details.
+            
+            ## Docker Images
+            
+            All images are available on Docker Hub with tag `${{ needs.build-release.outputs.version }}`:
+            
+            - `conveer/api-gateway:${{ needs.build-release.outputs.version }}`
+            - `conveer/proxy-service:${{ needs.build-release.outputs.version }}`
+            - `conveer/sms-service:${{ needs.build-release.outputs.version }}`
+            - `conveer/warming-service:${{ needs.build-release.outputs.version }}`
+            - `conveer/vk-service:${{ needs.build-release.outputs.version }}`
+            - `conveer/telegram-service:${{ needs.build-release.outputs.version }}`
+            - `conveer/telegram-bot:${{ needs.build-release.outputs.version }}`
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # ==================== Notify ====================
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: always()
+    steps:
+      - name: Send Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: "#deployments"
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          text: |
+            Deployment to production: ${{ job.status }}
+            Version: ${{ needs.build-release.outputs.version }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
