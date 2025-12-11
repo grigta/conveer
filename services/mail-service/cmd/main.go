@@ -9,12 +9,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/conveer/mail-service/internal/config"
-	"github.com/conveer/mail-service/internal/handlers"
-	"github.com/conveer/mail-service/internal/repository"
-	"github.com/conveer/mail-service/internal/service"
-	pb "github.com/conveer/mail-service/proto"
-	"github.com/conveer/pkg/encryption"
+	"github.com/conveer/conveer/services/mail-service/internal/config"
+	"github.com/conveer/conveer/services/mail-service/internal/handlers"
+	"github.com/conveer/conveer/services/mail-service/internal/repository"
+	"github.com/conveer/conveer/services/mail-service/internal/service"
+	pb "github.com/conveer/conveer/services/mail-service/proto"
+	"github.com/conveer/conveer/pkg/crypto"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/streadway/amqp"
@@ -74,7 +74,10 @@ func main() {
 	}
 	
 	// Initialize encryptor
-	encryptor := encryption.NewAESEncryptor(cfg.Encryption.Key)
+	encryptor, err := crypto.NewEncryptor(cfg.Encryption.Key)
+	if err != nil {
+		log.Fatalf("Failed to create encryptor: %v", err)
+	}
 	
 	// Initialize repositories
 	accountRepo := repository.NewAccountRepository(db, encryptor)
