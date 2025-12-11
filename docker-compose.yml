@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MongoDB
   mongodb:
@@ -475,8 +473,8 @@ services:
   # Telegram Bot
   telegram-bot:
     build:
-      context: ./services/telegram-bot
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./services/telegram-bot/Dockerfile
     container_name: conveer-telegram-bot
     restart: always
     environment:

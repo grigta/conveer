@@ -1,3 +1,4 @@
+# Build stage
 FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
@@ -5,11 +6,8 @@ WORKDIR /app
 # Install dependencies
 RUN apk add --no-cache git
 
-# Copy go mod files
+# Copy go mod files from root
 COPY go.mod go.sum ./
-
-# Copy shared packages
-COPY ../../pkg /pkg
 
 # Download dependencies
 RUN go mod download
@@ -18,18 +16,18 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o telegram-bot ./cmd/main.go
+RUN cd services/telegram-bot && CGO_ENABLED=0 GOOS=linux go build -o /bin/telegram-bot ./cmd/main.go
 
 # Final stage
 FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+WORKDIR /app
 
 # Copy binary and configs
-COPY --from=builder /app/telegram-bot .
-COPY --from=builder /app/configs ./configs
+COPY --from=builder /bin/telegram-bot .
+COPY services/telegram-bot/configs ./configs
 
 EXPOSE 8080
 
