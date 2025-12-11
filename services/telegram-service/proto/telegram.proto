@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package telegram;
 
-option go_package = "conveer/services/telegram-service/proto";
+option go_package = "github.com/conveer/conveer/services/telegram-service/proto";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";

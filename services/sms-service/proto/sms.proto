@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package sms;
 
-option go_package = "conveer/sms-service/proto;pb";
+option go_package = "github.com/conveer/conveer/services/sms-service/proto";
 
 service SMSService {
   rpc PurchaseNumber(PurchaseNumberRequest) returns (PurchaseNumberResponse);

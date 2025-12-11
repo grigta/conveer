@@ -17,7 +17,6 @@ import (
 	"github.com/go-telegram/bot"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"google.golang.org/grpc"
 )
 
 func main() {
@@ -87,22 +86,15 @@ func main() {
 	log.Println("Initialized gRPC clients")
 
 	// Create export repository
-	grpcClientsMap := make(map[string]*grpc.ClientConn)
+	var exportClients *repository.ExportClients
 	if grpcClients != nil {
-		if grpcClients.VKClient != nil {
-			grpcClientsMap["vk"] = grpcClients.VKClient
-		}
-		if grpcClients.TelegramClient != nil {
-			grpcClientsMap["telegram"] = grpcClients.TelegramClient
-		}
-		if grpcClients.MailClient != nil {
-			grpcClientsMap["mail"] = grpcClients.MailClient
-		}
-		if grpcClients.MaxClient != nil {
-			grpcClientsMap["max"] = grpcClients.MaxClient
+		exportClients = &repository.ExportClients{
+			VKServiceClient:       grpcClients.VKServiceClient,
+			TelegramServiceClient: grpcClients.TelegramServiceClient,
+			Encryptor:             grpcClients.Encryptor,
 		}
 	}
-	exportRepo := repository.NewExportRepository(grpcClientsMap)
+	exportRepo := repository.NewExportRepository(exportClients)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo)

@@ -6,10 +6,9 @@ import (
 	"time"
 
 	"github.com/conveer/conveer/services/telegram-bot/internal/models"
-	"github.com/conveer/conveer/services/telegram-bot/internal/service"
+	"github.com/conveer/conveer/pkg/crypto"
 	vkpb "github.com/conveer/conveer/services/vk-service/proto"
 	telegrampb "github.com/conveer/conveer/services/telegram-service/proto"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type ExportRepository interface {
@@ -17,13 +16,20 @@ type ExportRepository interface {
 	GetSessionData(ctx context.Context, platform string, accountID string) (*models.SessionData, error)
 }
 
-type exportRepository struct {
-	grpcClients *service.GRPCClients
+// ExportClients contains the gRPC clients needed for export operations
+type ExportClients struct {
+	VKServiceClient       vkpb.VKServiceClient
+	TelegramServiceClient telegrampb.TelegramServiceClient
+	Encryptor             *crypto.Encryptor
 }
 
-func NewExportRepository(grpcClients *service.GRPCClients) ExportRepository {
+type exportRepository struct {
+	clients *ExportClients
+}
+
+func NewExportRepository(clients *ExportClients) ExportRepository {
 	return &exportRepository{
-		grpcClients: grpcClients,
+		clients: clients,
 	}
 }
 
@@ -44,7 +50,7 @@ func (r *exportRepository) GetAccountsForExport(ctx context.Context, platform st
 }
 
 func (r *exportRepository) getVKAccounts(ctx context.Context, accountIDs []string) ([]*models.Account, error) {
-	if r.grpcClients.VKServiceClient == nil {
+	if r.clients.VKServiceClient == nil {
 		return nil, fmt.Errorf("VK service not available")
 	}
 
@@ -52,8 +58,8 @@ func (r *exportRepository) getVKAccounts(ctx context.Context, accountIDs []strin
 
 	if len(accountIDs) == 0 {
 		// Get all accounts
-		resp, err := r.grpcClients.VKServiceClient.ListAccounts(ctx, &vkpb.ListAccountsRequest{
-			Limit: 1000, // или другой разумный лимит
+		resp, err := r.clients.VKServiceClient.ListAccounts(ctx, &vkpb.ListAccountsRequest{
+			Limit: 1000,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("failed to list VK accounts: %w", err)
@@ -62,18 +68,18 @@ func (r *exportRepository) getVKAccounts(ctx context.Context, accountIDs []strin
 		for _, pbAccount := range resp.Accounts {
 			account, err := r.convertVKAccount(pbAccount)
 			if err != nil {
-				continue // логируем и пропускаем проблемные аккаунты
+				continue
 			}
 			accounts = append(accounts, account)
 		}
 	} else {
 		// Get specific accounts by IDs
 		for _, accountID := range accountIDs {
-			pbAccount, err := r.grpcClients.VKServiceClient.GetAccount(ctx, &vkpb.GetAccountRequest{
+			pbAccount, err := r.clients.VKServiceClient.GetAccount(ctx, &vkpb.GetAccountRequest{
 				AccountId: accountID,
 			})
 			if err != nil {
-				continue // логируем и пропускаем отсутствующие аккаунты
+				continue
 			}
 
 			account, err := r.convertVKAccount(pbAccount)
@@ -88,7 +94,7 @@ func (r *exportRepository) getVKAccounts(ctx context.Context, accountIDs []strin
 }
 
 func (r *exportRepository) getTelegramAccounts(ctx context.Context, accountIDs []string) ([]*models.Account, error) {
-	if r.grpcClients.TelegramServiceClient == nil {
+	if r.clients.TelegramServiceClient == nil {
 		return nil, fmt.Errorf("Telegram service not available")
 	}
 
@@ -96,7 +102,7 @@ func (r *exportRepository) getTelegramAccounts(ctx context.Context, accountIDs [
 
 	if len(accountIDs) == 0 {
 		// Get all accounts
-		resp, err := r.grpcClients.TelegramServiceClient.ListAccounts(ctx, &telegrampb.ListAccountsRequest{
+		resp, err := r.clients.TelegramServiceClient.ListAccounts(ctx, &telegrampb.ListAccountsRequest{
 			Limit: 1000,
 		})
 		if err != nil {
@@ -113,7 +119,7 @@ func (r *exportRepository) getTelegramAccounts(ctx context.Context, accountIDs [
 	} else {
 		// Get specific accounts by IDs
 		for _, accountID := range accountIDs {
-			pbAccount, err := r.grpcClients.TelegramServiceClient.GetAccount(ctx, &telegrampb.GetAccountRequest{
+			pbAccount, err := r.clients.TelegramServiceClient.GetAccount(ctx, &telegrampb.GetAccountRequest{
 				AccountId: accountID,
 			})
 			if err != nil {
@@ -141,30 +147,30 @@ func (r *exportRepository) convertVKAccount(pbAccount *vkpb.Account) (*models.Ac
 		ProxyID:  pbAccount.ProxyId,
 	}
 
-	// Дешифруем телефон
-	if pbAccount.Phone != "" {
-		phone, err := r.grpcClients.Encryptor.Decrypt(pbAccount.Phone)
+	// Decrypt phone
+	if pbAccount.Phone != "" && r.clients.Encryptor != nil {
+		phone, err := r.clients.Encryptor.Decrypt(pbAccount.Phone)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decrypt phone for account %s: %w", pbAccount.Id, err)
 		}
 		account.Phone = phone
 	}
 
-	// Дешифруем email
-	if pbAccount.Email != "" {
-		email, err := r.grpcClients.Encryptor.Decrypt(pbAccount.Email)
+	// Decrypt email
+	if pbAccount.Email != "" && r.clients.Encryptor != nil {
+		email, err := r.clients.Encryptor.Decrypt(pbAccount.Email)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decrypt email for account %s: %w", pbAccount.Id, err)
 		}
 		account.Email = email
 	}
 
-	// Конвертируем timestamps
+	// Convert timestamps
 	if pbAccount.CreatedAt != nil {
 		account.CreatedAt = pbAccount.CreatedAt.AsTime()
 	}
 
-	// Копируем метаданные
+	// Copy metadata
 	if account.Metadata == nil {
 		account.Metadata = make(map[string]interface{})
 	}
@@ -185,21 +191,21 @@ func (r *exportRepository) convertTelegramAccount(pbAccount *telegrampb.Account)
 		ProxyID:  pbAccount.ProxyId,
 	}
 
-	// Дешифруем телефон
-	if pbAccount.Phone != "" {
-		phone, err := r.grpcClients.Encryptor.Decrypt(pbAccount.Phone)
+	// Decrypt phone
+	if pbAccount.Phone != "" && r.clients.Encryptor != nil {
+		phone, err := r.clients.Encryptor.Decrypt(pbAccount.Phone)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decrypt phone for account %s: %w", pbAccount.Id, err)
 		}
 		account.Phone = phone
 	}
 
-	// Конвертируем timestamps
+	// Convert timestamps
 	if pbAccount.CreatedAt != nil {
 		account.CreatedAt = pbAccount.CreatedAt.AsTime()
 	}
 
-	// Копируем метаданные
+	// Copy metadata
 	if account.Metadata == nil {
 		account.Metadata = make(map[string]interface{})
 	}
@@ -215,15 +221,15 @@ func (r *exportRepository) GetSessionData(ctx context.Context, platform string, 
 		return nil, fmt.Errorf("session data only available for telegram")
 	}
 
-	if r.grpcClients.TelegramServiceClient == nil {
+	if r.clients.TelegramServiceClient == nil {
 		return nil, fmt.Errorf("Telegram service not available")
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
-	// Получаем данные сессии через gRPC
-	pbSessionData, err := r.grpcClients.TelegramServiceClient.GetSessionData(ctx, &telegrampb.GetSessionDataRequest{
+	// Get session data via gRPC
+	pbSessionData, err := r.clients.TelegramServiceClient.GetSessionData(ctx, &telegrampb.GetSessionDataRequest{
 		AccountId: accountID,
 	})
 	if err != nil {
@@ -237,36 +243,36 @@ func (r *exportRepository) GetSessionData(ctx context.Context, platform string, 
 		Port:          int(pbSessionData.Port),
 	}
 
-	// Дешифруем телефон
-	if pbSessionData.Phone != "" {
-		phone, err := r.grpcClients.Encryptor.Decrypt(pbSessionData.Phone)
+	// Decrypt phone
+	if pbSessionData.Phone != "" && r.clients.Encryptor != nil {
+		phone, err := r.clients.Encryptor.Decrypt(pbSessionData.Phone)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decrypt phone for account %s: %w", accountID, err)
 		}
 		sessionData.Phone = phone
 	}
 
-	// Дешифруем строку сессии
-	if pbSessionData.SessionString != "" {
-		sessionString, err := r.grpcClients.Encryptor.Decrypt(pbSessionData.SessionString)
+	// Decrypt session string
+	if pbSessionData.SessionString != "" && r.clients.Encryptor != nil {
+		sessionString, err := r.clients.Encryptor.Decrypt(pbSessionData.SessionString)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decrypt session string for account %s: %w", accountID, err)
 		}
 		sessionData.SessionString = sessionString
 	}
 
-	// Дешифруем cookies
-	if pbSessionData.Cookies != "" {
-		cookies, err := r.grpcClients.Encryptor.Decrypt(pbSessionData.Cookies)
+	// Decrypt cookies
+	if pbSessionData.Cookies != "" && r.clients.Encryptor != nil {
+		cookies, err := r.clients.Encryptor.Decrypt(pbSessionData.Cookies)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decrypt cookies for account %s: %w", accountID, err)
 		}
 		sessionData.Cookies = cookies
 	}
 
-	// Дешифруем localStorage
-	if pbSessionData.LocalStorage != "" {
-		localStorage, err := r.grpcClients.Encryptor.Decrypt(pbSessionData.LocalStorage)
+	// Decrypt localStorage
+	if pbSessionData.LocalStorage != "" && r.clients.Encryptor != nil {
+		localStorage, err := r.clients.Encryptor.Decrypt(pbSessionData.LocalStorage)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decrypt local storage for account %s: %w", accountID, err)
 		}
