@@ -1,0 +1,67 @@
+name: Deploy to VDS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Ручной запуск
+
+env:
+  VDS_HOST: 213.108.199.22
+  VDS_USER: root
+  APP_DIR: /opt/conveer
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VDS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.VDS_HOST }}
+          username: ${{ env.VDS_USER }}
+          password: ${{ secrets.VDS_PASSWORD }}
+          port: 22
+          script: |
+            echo "=== Starting deployment ==="
+            cd ${{ env.APP_DIR }}
+            
+            # Pull latest changes
+            echo "Pulling latest code..."
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # Pull latest Docker images
+            echo "Pulling Docker images..."
+            docker-compose pull
+            
+            # Restart services with zero downtime
+            echo "Restarting services..."
+            docker-compose up -d --remove-orphans
+            
+            # Clean up old images
+            echo "Cleaning up..."
+            docker image prune -f
+            
+            # Health check
+            echo "Checking services..."
+            sleep 10
+            docker-compose ps
+            
+            echo "=== Deployment completed ==="
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "Services are running at http://${{ env.VDS_HOST }}:8080"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+

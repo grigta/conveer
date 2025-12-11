@@ -9,8 +9,8 @@ services:
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-admin123}
       MONGO_INITDB_DATABASE: conveer
     volumes:
       - mongodb_data:/data/db
@@ -24,7 +24,7 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
     volumes:
       - redis_data:/data
     networks:
@@ -39,8 +39,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
@@ -70,7 +70,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards
@@ -441,6 +441,36 @@ services:
     networks:
       - conveer-network
     shm_size: 2gb
+
+  # Warming Service
+  warming-service:
+    build:
+      context: .
+      dockerfile: ./services/warming-service/Dockerfile
+    container_name: conveer-warming-service
+    restart: always
+    ports:
+      - "50063:50063"
+      - "8013:8013"
+    environment:
+      - SERVICE_NAME=warming-service
+      - GRPC_PORT=50063
+      - HTTP_PORT=8013
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+      - proxy-service
+      - vk-service
+      - telegram-service
+      - mail-service
+      - max-service
+    volumes:
+      - ./services/warming-service/configs:/app/configs
+    networks:
+      - conveer-network
 
   # Telegram Bot
   telegram-bot:
