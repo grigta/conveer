@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/conveer/max-service/internal/models"
-	"github.com/conveer/max-service/internal/service"
+	"github.com/conveer/conveer/services/max-service/internal/models"
+	"github.com/conveer/conveer/services/max-service/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/conveer/telegram-bot/internal/models"
-	"github.com/conveer/telegram-bot/internal/service"
+	"github.com/conveer/conveer/services/telegram-bot/internal/models"
+	"github.com/conveer/conveer/services/telegram-bot/internal/service"
 )
 
 func FormatAccountsTable(accounts []*models.Account) string {

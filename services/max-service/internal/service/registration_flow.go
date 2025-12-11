@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/conveer/max-service/internal/models"
-	proxypb "github.com/conveer/proxy-service/proto"
+	"github.com/conveer/conveer/services/max-service/internal/models"
+	proxypb "github.com/conveer/conveer/services/proxy-service/proto"
 	"github.com/playwright-community/playwright-go"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

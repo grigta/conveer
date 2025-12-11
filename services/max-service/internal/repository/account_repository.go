@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/conveer/max-service/internal/models"
-	"github.com/conveer/pkg/encryption"
+	"github.com/conveer/conveer/services/max-service/internal/models"
+	"github.com/conveer/conveer/pkg/crypto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,11 +16,11 @@ import (
 // AccountRepository handles account database operations
 type AccountRepository struct {
 	collection *mongo.Collection
-	encryptor  *encryption.AESEncryptor
+	encryptor  *crypto.Encryptor
 }
 
 // NewAccountRepository creates a new account repository
-func NewAccountRepository(db *mongo.Database, encryptor *encryption.AESEncryptor) *AccountRepository {
+func NewAccountRepository(db *mongo.Database, encryptor *crypto.Encryptor) *AccountRepository {
 	return &AccountRepository{
 		collection: db.Collection("max_accounts"),
 		encryptor:  encryptor,

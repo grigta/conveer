@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/conveer/telegram-bot/internal/models"
-	"github.com/conveer/telegram-bot/internal/service"
+	"github.com/conveer/conveer/services/telegram-bot/internal/models"
+	"github.com/conveer/conveer/services/telegram-bot/internal/service"
 	vkpb "github.com/conveer/conveer/services/vk-service/proto"
 	telegrampb "github.com/conveer/conveer/services/telegram-service/proto"
 	"google.golang.org/protobuf/types/known/emptypb"

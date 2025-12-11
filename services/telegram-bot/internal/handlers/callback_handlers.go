@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/conveer/telegram-bot/internal/models"
-	"github.com/conveer/telegram-bot/internal/service"
-	"github.com/conveer/telegram-bot/internal/utils"
+	"github.com/conveer/conveer/services/telegram-bot/internal/models"
+	"github.com/conveer/conveer/services/telegram-bot/internal/service"
+	"github.com/conveer/conveer/services/telegram-bot/internal/utils"
 	"github.com/go-telegram/bot"
 	botmodels "github.com/go-telegram/bot/models"
 )

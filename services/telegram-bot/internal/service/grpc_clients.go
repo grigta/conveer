@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/conveer/telegram-bot/internal/config"
+	"github.com/conveer/conveer/services/telegram-bot/internal/config"
 	vkpb "github.com/conveer/conveer/services/vk-service/proto"
 	telegrampb "github.com/conveer/conveer/services/telegram-service/proto"
 	analyticspb "github.com/conveer/conveer/services/analytics-service/proto"

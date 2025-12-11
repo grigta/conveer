@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/conveer/max-service/internal/models"
+	"github.com/conveer/conveer/services/max-service/internal/models"
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

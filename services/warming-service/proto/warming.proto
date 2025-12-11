@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package warming;
 
-option go_package = "conveer/services/warming-service/proto";
+option go_package = "github.com/conveer/conveer/services/warming-service/proto";
 
 import "google/protobuf/timestamp.proto";
 

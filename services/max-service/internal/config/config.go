@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/conveer/max-service/internal/models"
+	"github.com/conveer/conveer/services/max-service/internal/models"
 	"gopkg.in/yaml.v3"
 )
 

@@ -3,9 +3,9 @@ package handlers
 import (
 	"context"
 
-	"github.com/conveer/max-service/internal/models"
-	"github.com/conveer/max-service/internal/service"
-	pb "github.com/conveer/max-service/proto"
+	"github.com/conveer/conveer/services/max-service/internal/models"
+	"github.com/conveer/conveer/services/max-service/internal/service"
+	pb "github.com/conveer/conveer/services/max-service/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
