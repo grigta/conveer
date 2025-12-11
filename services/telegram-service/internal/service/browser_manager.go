@@ -7,16 +7,10 @@ import (
 	"time"
 
 	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/telegram-service/internal/models"
 
 	"github.com/playwright-community/playwright-go"
 )
-
-type BrowserConfig struct {
-	PoolSize       int
-	Headless       bool
-	UserDataDir    string
-	DefaultTimeout time.Duration
-}
 
 type BrowserInstance struct {
 	Browser   playwright.Browser
@@ -35,7 +29,7 @@ type BrowserManager interface {
 
 type browserManager struct {
 	pw         *playwright.Playwright
-	config     *BrowserConfig
+	config     *models.BrowserConfig
 	pool       []*BrowserInstance
 	poolMu     sync.RWMutex
 	logger     logger.Logger
@@ -56,7 +50,7 @@ type PoolStats struct {
 	InUseBrowsers    int
 }
 
-func NewBrowserManager(config *BrowserConfig, metrics MetricsCollector, logger logger.Logger) BrowserManager {
+func NewBrowserManager(config *models.BrowserConfig, metrics MetricsCollector, logger logger.Logger) BrowserManager {
 	return &browserManager{
 		config:     config,
 		pool:       make([]*BrowserInstance, 0, config.PoolSize),

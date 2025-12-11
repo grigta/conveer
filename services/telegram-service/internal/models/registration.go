@@ -85,3 +85,11 @@ type ProfileData struct {
 	Bio        string    `json:"bio,omitempty"`
 	AvatarURL  string    `json:"avatar_url,omitempty"`
 }
+
+// BrowserConfig holds browser pool configuration
+type BrowserConfig struct {
+	PoolSize       int           `json:"pool_size"`
+	Headless       bool          `json:"headless"`
+	UserDataDir    string        `json:"user_data_dir"`
+	DefaultTimeout time.Duration `json:"default_timeout"`
+}

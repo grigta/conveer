@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/grigta/conveer/services/telegram-service/internal/models"
-	"github.com/grigta/conveer/services/telegram-service/internal/service"
 
 	"gopkg.in/yaml.v3"
 )
@@ -201,9 +200,9 @@ func (c *Config) ToRegistrationConfig() *models.RegistrationConfig {
 	}
 }
 
-// ToBrowserConfig converts to service.BrowserConfig
-func (c *Config) ToBrowserConfig() *service.BrowserConfig {
-	return &service.BrowserConfig{
+// ToBrowserConfig converts to models.BrowserConfig
+func (c *Config) ToBrowserConfig() *models.BrowserConfig {
+	return &models.BrowserConfig{
 		PoolSize:       c.Telegram.Browser.PoolSize,
 		Headless:       c.Telegram.Browser.Headless,
 		UserDataDir:    c.Telegram.Browser.UserDataDir,
