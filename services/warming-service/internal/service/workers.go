@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"conveer/services/warming-service/internal/models"
+	"github.com/grigta/conveer/services/warming-service/internal/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

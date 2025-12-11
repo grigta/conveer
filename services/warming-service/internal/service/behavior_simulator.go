@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"time"
 
-	"conveer/pkg/logger"
-	"conveer/services/warming-service/internal/config"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/warming-service/internal/config"
 )
 
 type BehaviorSimulator struct {

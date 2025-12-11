@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"conveer/pkg/logger"
-	"conveer/services/vk-service/internal/models"
-	"conveer/services/vk-service/internal/service"
-	pb "conveer/services/vk-service/proto"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/vk-service/internal/models"
+	"github.com/grigta/conveer/services/vk-service/internal/service"
+	pb "github.com/grigta/conveer/services/vk-service/proto"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"

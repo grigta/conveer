@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"conveer/pkg/logger"
-	"conveer/services/warming-service/internal/models"
-	"conveer/services/warming-service/internal/service"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/warming-service/internal/models"
+	"github.com/grigta/conveer/services/warming-service/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"

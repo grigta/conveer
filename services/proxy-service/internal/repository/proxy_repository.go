@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"conveer/pkg/crypto"
-	"conveer/pkg/database"
-	"conveer/services/proxy-service/internal/models"
+	"github.com/grigta/conveer/pkg/crypto"
+	"github.com/grigta/conveer/pkg/database"
+	"github.com/grigta/conveer/services/proxy-service/internal/models"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

@@ -11,9 +11,9 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"conveer/pkg/testutil"
-	"conveer/services/sms-service/internal/model"
-	"conveer/services/sms-service/internal/repository"
+	"github.com/grigta/conveer/pkg/testutil"
+	"github.com/grigta/conveer/services/sms-service/internal/models"
+	"github.com/grigta/conveer/services/sms-service/internal/repository"
 )
 
 // SMSServiceIntegrationSuite tests SMS service with real MongoDB and mock provider

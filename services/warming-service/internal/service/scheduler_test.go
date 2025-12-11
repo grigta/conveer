@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"conveer/services/warming-service/internal/config"
-	"conveer/services/warming-service/internal/models"
+	"github.com/grigta/conveer/services/warming-service/internal/config"
+	"github.com/grigta/conveer/services/warming-service/internal/models"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

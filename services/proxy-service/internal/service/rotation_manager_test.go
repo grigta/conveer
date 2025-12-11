@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"conveer/pkg/config"
-	"conveer/services/proxy-service/internal/models"
+	"github.com/grigta/conveer/pkg/config"
+	"github.com/grigta/conveer/services/proxy-service/internal/models"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"

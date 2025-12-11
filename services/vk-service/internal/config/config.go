@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"conveer/services/vk-service/internal/models"
-	"conveer/services/vk-service/internal/service"
+	"github.com/grigta/conveer/services/vk-service/internal/models"
+	"github.com/grigta/conveer/services/vk-service/internal/service"
 
 	"gopkg.in/yaml.v3"
 )

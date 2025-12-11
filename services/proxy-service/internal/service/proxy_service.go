@@ -8,11 +8,11 @@ import (
 	"sync"
 	"time"
 
-	"conveer/pkg/cache"
-	"conveer/pkg/config"
-	"conveer/pkg/messaging"
-	"conveer/services/proxy-service/internal/models"
-	"conveer/services/proxy-service/internal/repository"
+	"github.com/grigta/conveer/pkg/cache"
+	"github.com/grigta/conveer/pkg/config"
+	"github.com/grigta/conveer/pkg/messaging"
+	"github.com/grigta/conveer/services/proxy-service/internal/models"
+	"github.com/grigta/conveer/services/proxy-service/internal/repository"
 
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"

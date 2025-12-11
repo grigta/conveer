@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"conveer/pkg/logger"
-	"conveer/pkg/messaging"
-	"conveer/services/vk-service/internal/models"
-	"conveer/services/vk-service/internal/repository"
-	proxypb "conveer/services/proxy-service/proto"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/pkg/messaging"
+	"github.com/grigta/conveer/services/vk-service/internal/models"
+	"github.com/grigta/conveer/services/vk-service/internal/repository"
+	proxypb "github.com/grigta/conveer/services/proxy-service/proto"
 
 	"github.com/streadway/amqp"
 	"go.mongodb.org/mongo-driver/bson"

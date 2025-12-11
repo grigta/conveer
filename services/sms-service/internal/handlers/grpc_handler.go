@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"conveer/sms-service/internal/service"
-	pb "conveer/sms-service/proto"
+	"github.com/grigta/conveer/services/sms-service/internal/service"
+	pb "github.com/grigta/conveer/services/sms-service/proto"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"

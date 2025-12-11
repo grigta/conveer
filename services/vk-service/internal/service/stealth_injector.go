@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"time"
 
-	"conveer/pkg/logger"
+	"github.com/grigta/conveer/pkg/logger"
 
 	"github.com/playwright-community/playwright-go"
 )

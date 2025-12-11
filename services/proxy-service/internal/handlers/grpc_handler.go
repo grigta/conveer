@@ -3,10 +3,10 @@ package handlers
 import (
 	"context"
 
-	"conveer/services/proxy-service/internal/models"
-	pb "conveer/services/proxy-service/proto"
-	"conveer/services/proxy-service/internal/repository"
-	"conveer/services/proxy-service/internal/service"
+	"github.com/grigta/conveer/services/proxy-service/internal/models"
+	pb "github.com/grigta/conveer/services/proxy-service/proto"
+	"github.com/grigta/conveer/services/proxy-service/internal/repository"
+	"github.com/grigta/conveer/services/proxy-service/internal/service"
 
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"

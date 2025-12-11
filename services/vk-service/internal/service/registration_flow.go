@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"conveer/pkg/crypto"
-	"conveer/pkg/logger"
-	"conveer/services/vk-service/internal/models"
-	"conveer/services/vk-service/internal/repository"
-	proxypb "conveer/services/proxy-service/proto"
-	smspb "conveer/services/sms-service/proto"
+	"github.com/grigta/conveer/pkg/crypto"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/vk-service/internal/models"
+	"github.com/grigta/conveer/services/vk-service/internal/repository"
+	proxypb "github.com/grigta/conveer/services/proxy-service/proto"
+	smspb "github.com/grigta/conveer/services/sms-service/proto"
 
 	"github.com/playwright-community/playwright-go"
 	"go.mongodb.org/mongo-driver/bson"

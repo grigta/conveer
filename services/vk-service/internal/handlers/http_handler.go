@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"conveer/pkg/logger"
-	"conveer/services/vk-service/internal/models"
-	"conveer/services/vk-service/internal/service"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/vk-service/internal/models"
+	"github.com/grigta/conveer/services/vk-service/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

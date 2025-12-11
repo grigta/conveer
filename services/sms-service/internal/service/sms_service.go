@@ -6,8 +6,8 @@ import (
 	"math/rand"
 	"time"
 
-	"conveer/sms-service/internal/models"
-	"conveer/sms-service/internal/repository"
+	"github.com/grigta/conveer/services/sms-service/internal/models"
+	"github.com/grigta/conveer/services/sms-service/internal/repository"
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"

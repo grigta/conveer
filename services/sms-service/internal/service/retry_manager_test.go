@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"conveer/sms-service/internal/models"
+	"github.com/grigta/conveer/services/sms-service/internal/models"
 
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"

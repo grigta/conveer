@@ -7,12 +7,12 @@ import (
 	"math/rand"
 	"time"
 
-	"conveer/pkg/cache"
-	"conveer/pkg/logger"
-	"conveer/pkg/messaging"
-	"conveer/services/warming-service/internal/config"
-	"conveer/services/warming-service/internal/models"
-	"conveer/services/warming-service/internal/repository"
+	"github.com/grigta/conveer/pkg/cache"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/pkg/messaging"
+	"github.com/grigta/conveer/services/warming-service/internal/config"
+	"github.com/grigta/conveer/services/warming-service/internal/models"
+	"github.com/grigta/conveer/services/warming-service/internal/repository"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"

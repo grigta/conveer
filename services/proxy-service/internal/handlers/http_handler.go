@@ -3,10 +3,10 @@ package handlers
 import (
 	"net/http"
 
-	"conveer/pkg/middleware"
-	"conveer/services/proxy-service/internal/models"
-	"conveer/services/proxy-service/internal/repository"
-	"conveer/services/proxy-service/internal/service"
+	"github.com/grigta/conveer/pkg/middleware"
+	"github.com/grigta/conveer/services/proxy-service/internal/models"
+	"github.com/grigta/conveer/services/proxy-service/internal/repository"
+	"github.com/grigta/conveer/services/proxy-service/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

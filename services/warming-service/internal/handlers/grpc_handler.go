@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"time"
 
-	"conveer/pkg/logger"
-	"conveer/services/warming-service/internal/models"
-	"conveer/services/warming-service/internal/service"
-	pb "conveer/services/warming-service/proto"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/warming-service/internal/models"
+	"github.com/grigta/conveer/services/warming-service/internal/service"
+	pb "github.com/grigta/conveer/services/warming-service/proto"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"conveer/sms-service/internal/service"
+	"github.com/grigta/conveer/services/sms-service/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"conveer/sms-service/internal/models"
+	"github.com/grigta/conveer/services/sms-service/internal/models"
 
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"

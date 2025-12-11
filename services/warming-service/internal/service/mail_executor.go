@@ -6,8 +6,8 @@ import (
 	"math/rand"
 	"time"
 
-	"conveer/pkg/logger"
-	"conveer/services/warming-service/internal/models"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/warming-service/internal/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
 )

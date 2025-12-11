@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"conveer/services/telegram-service/internal/models"
-	"conveer/services/telegram-service/internal/service"
+	"github.com/grigta/conveer/services/telegram-service/internal/models"
+	"github.com/grigta/conveer/services/telegram-service/internal/service"
 
 	"gopkg.in/yaml.v3"
 )

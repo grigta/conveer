@@ -13,7 +13,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"conveer/pkg/testutil"
+	"github.com/grigta/conveer/pkg/testutil"
 )
 
 // FullPipelineE2ESuite tests the complete account creation and warming pipeline

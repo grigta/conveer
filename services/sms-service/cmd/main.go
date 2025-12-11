@@ -10,10 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	"conveer/sms-service/internal/handlers"
-	"conveer/sms-service/internal/repository"
-	"conveer/sms-service/internal/service"
-	pb "conveer/sms-service/proto"
+	"github.com/grigta/conveer/services/sms-service/internal/handlers"
+	"github.com/grigta/conveer/services/sms-service/internal/repository"
+	"github.com/grigta/conveer/services/sms-service/internal/service"
+	pb "github.com/grigta/conveer/services/sms-service/proto"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"

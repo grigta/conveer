@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"conveer/pkg/crypto"
-	"conveer/pkg/logger"
-	"conveer/services/vk-service/internal/models"
+	"github.com/grigta/conveer/pkg/crypto"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/vk-service/internal/models"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

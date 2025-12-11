@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"conveer/pkg/logger"
+	"github.com/grigta/conveer/pkg/logger"
 
 	"github.com/playwright-community/playwright-go"
 )

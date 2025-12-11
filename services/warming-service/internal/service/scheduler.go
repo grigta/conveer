@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"conveer/pkg/logger"
-	"conveer/services/warming-service/internal/config"
-	"conveer/services/warming-service/internal/models"
-	"conveer/services/warming-service/internal/repository"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/warming-service/internal/config"
+	"github.com/grigta/conveer/services/warming-service/internal/models"
+	"github.com/grigta/conveer/services/warming-service/internal/repository"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

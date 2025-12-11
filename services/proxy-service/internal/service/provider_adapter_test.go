@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"conveer/pkg/crypto"
-	"conveer/services/proxy-service/internal/models"
+	"github.com/grigta/conveer/pkg/crypto"
+	"github.com/grigta/conveer/services/proxy-service/internal/models"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"

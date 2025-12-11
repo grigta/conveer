@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"conveer/pkg/logger"
-	"conveer/services/vk-service/internal/models"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/vk-service/internal/models"
 
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"

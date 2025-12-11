@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"conveer/pkg/logger"
-	"conveer/services/telegram-service/internal/models"
-	"conveer/services/telegram-service/internal/service"
+	"github.com/grigta/conveer/pkg/logger"
+	"github.com/grigta/conveer/services/telegram-service/internal/models"
+	"github.com/grigta/conveer/services/telegram-service/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"

@@ -9,9 +9,9 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"conveer/pkg/testutil"
-	"conveer/services/warming-service/internal/model"
-	"conveer/services/warming-service/internal/repository"
+	"github.com/grigta/conveer/pkg/testutil"
+	"github.com/grigta/conveer/services/warming-service/internal/models"
+	"github.com/grigta/conveer/services/warming-service/internal/repository"
 )
 
 // WarmingServiceIntegrationSuite tests warming service with real MongoDB

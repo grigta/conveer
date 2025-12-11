@@ -9,10 +9,10 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"conveer/pkg/testutil"
-	"conveer/services/proxy-service/internal/model"
-	"conveer/services/proxy-service/internal/repository"
-	"conveer/services/proxy-service/internal/service"
+	"github.com/grigta/conveer/pkg/testutil"
+	"github.com/grigta/conveer/services/proxy-service/internal/models"
+	"github.com/grigta/conveer/services/proxy-service/internal/repository"
+	"github.com/grigta/conveer/services/proxy-service/internal/service"
 )
 
 // ProxyServiceIntegrationSuite tests proxy service with real MongoDB, Redis, and RabbitMQ
