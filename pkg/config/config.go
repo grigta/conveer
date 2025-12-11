@@ -11,6 +11,9 @@ import (
 type Config struct {
 	App          AppConfig
 	Database     DatabaseConfigNew
+	// Legacy/top-level compatibility (config.yaml uses `redis.*` and `rabbitmq.*`)
+	Redis        RedisConfig
+	RabbitMQ     RabbitMQConfig
 	Cache        CacheConfig
 	MessageQueue MessageQueueConfig
 	Crypto       CryptoConfig
@@ -36,6 +39,9 @@ type DatabaseConfig struct {
 }
 
 type DatabaseConfigNew struct {
+	// Legacy/top-level compatibility (config.yaml uses `database.uri` and `database.dbname`)
+	URI    string
+	DBName string
 	MongoDB MongoDBConfig
 }
 
@@ -176,10 +182,22 @@ func LoadConfigOld(path string) (*Config, error) {
 func getDefaultConfig() *Config {
 	return &Config{
 		Database: DatabaseConfigNew{
+			URI:    "mongodb://localhost:27017",
+			DBName: "conveer",
 			MongoDB: MongoDBConfig{
 				URI:    "mongodb://localhost:27017",
 				DBName: "conveer",
 			},
+		},
+		Redis: RedisConfig{
+			Addr:     "localhost:6379",
+			Host:     "localhost",
+			Port:     6379,
+			Password: "",
+			DB:       0,
+		},
+		RabbitMQ: RabbitMQConfig{
+			URL: "amqp://guest:guest@localhost:5672/",
 		},
 		Cache: CacheConfig{
 			Redis: RedisConfig{

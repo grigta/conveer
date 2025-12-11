@@ -14,8 +14,8 @@ import (
 	"github.com/grigta/conveer/pkg/config"
 	"github.com/grigta/conveer/pkg/crypto"
 	"github.com/grigta/conveer/pkg/database"
-	"github.com/grigta/conveer/pkg/logger"
 	"github.com/grigta/conveer/pkg/messaging"
+	"github.com/grigta/conveer/pkg/middleware"
 	"github.com/grigta/conveer/services/proxy-service/internal/handlers"
 	"github.com/grigta/conveer/services/proxy-service/internal/repository"
 	"github.com/grigta/conveer/services/proxy-service/internal/service"
@@ -33,26 +33,56 @@ func main() {
 	defer cancel()
 
 	cfg := config.LoadConfig()
-	log := logger.SetupLogger()
+	log := logrus.New()
+	if lvl, err := logrus.ParseLevel(cfg.App.LogLevel); err == nil {
+		log.SetLevel(lvl)
+	}
+	log.SetOutput(os.Stdout)
+	log.SetFormatter(&logrus.JSONFormatter{TimestampFormat: time.RFC3339Nano})
 
-	encryptor, err := crypto.NewEncryptor(cfg.Crypto.EncryptionKey)
+	encryptor, err := crypto.NewEncryptor(cfg.Encryption.Key)
 	if err != nil {
 		log.Fatal("Failed to create encryptor: ", err)
 	}
 
-	mongodb, err := database.NewMongoDB(ctx, cfg.Database.MongoDB.URI)
+	mongoURI := cfg.Database.URI
+	mongoDBName := cfg.Database.DBName
+	if mongoURI == "" {
+		mongoURI = cfg.Database.MongoDB.URI
+	}
+	if mongoDBName == "" {
+		mongoDBName = cfg.Database.MongoDB.DBName
+	}
+
+	mongodb, err := database.NewMongoDB(mongoURI, mongoDBName, 10*time.Second)
 	if err != nil {
 		log.Fatal("Failed to connect to MongoDB: ", err)
 	}
-	defer mongodb.Disconnect(ctx)
+	defer mongodb.Close()
 
-	redis, err := cache.NewRedisCache(ctx, cfg.Cache.Redis.Addr, cfg.Cache.Redis.Password, cfg.Cache.Redis.DB)
+	redisHost := cfg.Redis.Host
+	redisPort := cfg.Redis.Port
+	redisPassword := cfg.Redis.Password
+	redisDB := cfg.Redis.DB
+	if redisHost == "" {
+		redisHost = cfg.Cache.Redis.Host
+		redisPort = cfg.Cache.Redis.Port
+		redisPassword = cfg.Cache.Redis.Password
+		redisDB = cfg.Cache.Redis.DB
+	}
+
+	redis, err := cache.NewRedisCache(redisHost, redisPort, redisPassword, redisDB)
 	if err != nil {
 		log.Fatal("Failed to connect to Redis: ", err)
 	}
 	defer redis.Close()
 
-	rabbitmq, err := messaging.NewRabbitMQ(cfg.MessageQueue.RabbitMQ.URL)
+	rabbitURL := cfg.RabbitMQ.URL
+	if rabbitURL == "" {
+		rabbitURL = cfg.MessageQueue.RabbitMQ.URL
+	}
+
+	rabbitmq, err := messaging.NewRabbitMQ(rabbitURL)
 	if err != nil {
 		log.Fatal("Failed to connect to RabbitMQ: ", err)
 	}
@@ -201,7 +231,8 @@ func startHTTPServer(proxyService *service.ProxyService, proxyRepo *repository.P
 		Output: log.Out,
 	}))
 
-	httpHandler := handlers.NewHTTPHandler(proxyService, proxyRepo, providerRepo, log)
+	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
+	httpHandler := handlers.NewHTTPHandler(proxyService, proxyRepo, providerRepo, authMiddleware, log)
 	httpHandler.SetupRoutes(router)
 
 	// Add Prometheus metrics endpoint

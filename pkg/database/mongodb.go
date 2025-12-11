@@ -52,6 +52,10 @@ func (m *MongoDB) Close() error {
 	return m.client.Disconnect(ctx)
 }
 
+func (m *MongoDB) Client() *mongo.Client {
+	return m.client
+}
+
 func (m *MongoDB) GetDatabase() *mongo.Database {
 	return m.database
 }

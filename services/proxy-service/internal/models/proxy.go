@@ -27,6 +27,7 @@ const (
 	ProxyStatusExpired  ProxyStatus = "expired"
 	ProxyStatusBanned   ProxyStatus = "banned"
 	ProxyStatusChecking ProxyStatus = "checking"
+	ProxyStatusRotating ProxyStatus = "rotating"
 	ProxyStatusReleased ProxyStatus = "released"
 )
 

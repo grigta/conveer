@@ -226,7 +226,7 @@ func (r *ProxyRepository) GetExpiredProxies(ctx context.Context) ([]models.Proxy
 }
 
 func (r *ProxyRepository) BindProxyToAccount(ctx context.Context, proxyID primitive.ObjectID, accountID string) error {
-	session, err := r.db.Client.StartSession()
+	session, err := r.db.Client().StartSession()
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to start session")
 		return err

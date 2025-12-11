@@ -17,6 +17,7 @@ type HTTPHandler struct {
 	proxyService  *service.ProxyService
 	proxyRepo     *repository.ProxyRepository
 	providerRepo  *repository.ProviderRepository
+	authMiddleware *middleware.AuthMiddleware
 	logger        *logrus.Logger
 }
 
@@ -24,19 +25,23 @@ func NewHTTPHandler(
 	proxyService *service.ProxyService,
 	proxyRepo *repository.ProxyRepository,
 	providerRepo *repository.ProviderRepository,
+	authMiddleware *middleware.AuthMiddleware,
 	logger *logrus.Logger,
 ) *HTTPHandler {
 	return &HTTPHandler{
 		proxyService:  proxyService,
 		proxyRepo:     proxyRepo,
 		providerRepo:  providerRepo,
+		authMiddleware: authMiddleware,
 		logger:        logger,
 	}
 }
 
 func (h *HTTPHandler) SetupRoutes(router *gin.Engine) {
 	api := router.Group("/api/v1")
-	api.Use(middleware.AuthMiddleware())
+	if h.authMiddleware != nil {
+		api.Use(h.authMiddleware.Authenticate())
+	}
 
 	proxies := api.Group("/proxies")
 	{
@@ -262,12 +267,13 @@ func (h *HTTPHandler) GetProviders(c *gin.Context) {
 			"total_allocated":   stat.TotalAllocated,
 			"total_released":    stat.TotalReleased,
 			"total_rotated":     stat.TotalRotated,
-			"total_failed":      stat.TotalFailed,
 			"active_proxies":    stat.ActiveProxies,
+			"banned_proxies":    stat.BannedProxies,
+			"avg_response_time": stat.AvgResponseTime,
+			"failure_rate":      stat.FailureRate,
 			"last_request_time": stat.LastRequestTime,
 			"last_success_time": stat.LastSuccessTime,
-			"last_error_time":   stat.LastErrorTime,
-			"last_error":        stat.LastError,
+			"total_cost":        stat.TotalCost,
 		})
 	}
 
