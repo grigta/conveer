@@ -1,26 +1,31 @@
+# Build stage
 FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
-# Копирование go.mod и go.sum из корня проекта
+# Install git for go mod download
+RUN apk add --no-cache git
+
+# Copy go.mod and go.sum
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Копирование исходного кода
+# Copy source code
 COPY . .
 
-# Сборка приложения
+# Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -o analytics-service ./services/analytics-service/cmd
 
+# Runtime stage
 FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates
-WORKDIR /root/
+WORKDIR /app
 
-# Копирование бинарника
+# Copy binary
 COPY --from=builder /app/analytics-service .
 
-# Копирование конфигурации
+# Copy configs
 COPY --from=builder /app/services/analytics-service/configs ./configs
 
 EXPOSE 50056 8014
