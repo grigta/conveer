@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"time"
 
 	"github.com/grigta/conveer/services/sms-service/internal/service"
 	pb "github.com/grigta/conveer/services/sms-service/proto"

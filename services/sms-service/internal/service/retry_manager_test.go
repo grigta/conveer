@@ -67,7 +67,7 @@ func (s *RetryManagerTestSuite) TestScheduleRetry_Success() {
 		PhoneNumber:  "+1234567890",
 		Service:      "vk",
 		Country:      "RU",
-		Status:       "STATUS_WAIT_CODE",
+		Status:       models.ActivationStatus("STATUS_WAIT_CODE"),
 		RetryCount:   0,
 		UserID:       "user123",
 	}
@@ -77,7 +77,7 @@ func (s *RetryManagerTestSuite) TestScheduleRetry_Success() {
 	s.channel.On("Publish", "sms.commands", "retry", false, false, mock.AnythingOfType("amqp.Publishing")).
 		Return(nil)
 
-	rm := NewRetryManager(nil, s.logger) // Note: We'd need to adapt this for the mock channel
+	_ = NewRetryManager(nil, s.logger) // Note: we'd need to adapt this for the mock channel
 
 	// Since RetryManager uses real amqp.Channel, we test the logic
 	data, err := json.Marshal(activation)
@@ -132,7 +132,7 @@ func TestActivationSerialization(t *testing.T) {
 		PhoneNumber:  "+1234567890",
 		Service:      "vk",
 		Country:      "RU",
-		Status:       "STATUS_WAIT_CODE",
+		Status:       models.ActivationStatus("STATUS_WAIT_CODE"),
 		RetryCount:   2,
 		UserID:       "user123",
 		CreatedAt:    time.Now(),
@@ -165,7 +165,7 @@ func TestActivationModel(t *testing.T) {
 		PhoneNumber:  "+1234567890",
 		Service:      "vk",
 		Country:      "RU",
-		Status:       "STATUS_WAIT_CODE",
+		Status:       models.ActivationStatus("STATUS_WAIT_CODE"),
 		RetryCount:   0,
 		UserID:       "user123",
 		CreatedAt:    time.Now(),
@@ -176,7 +176,7 @@ func TestActivationModel(t *testing.T) {
 	assert.Equal(t, "+1234567890", activation.PhoneNumber)
 	assert.Equal(t, "vk", activation.Service)
 	assert.Equal(t, "RU", activation.Country)
-	assert.Equal(t, "STATUS_WAIT_CODE", activation.Status)
+	assert.Equal(t, models.ActivationStatus("STATUS_WAIT_CODE"), activation.Status)
 	assert.Equal(t, 0, activation.RetryCount)
 	assert.Equal(t, "user123", activation.UserID)
 	assert.True(t, activation.ExpiresAt.After(activation.CreatedAt))
@@ -189,7 +189,7 @@ func TestRetryMessageFormat(t *testing.T) {
 		PhoneNumber:  "+1234567890",
 		Service:      "vk",
 		Country:      "RU",
-		Status:       "STATUS_WAIT_CODE",
+		Status:       models.ActivationStatus("STATUS_WAIT_CODE"),
 		RetryCount:   1,
 		UserID:       "user123",
 	}

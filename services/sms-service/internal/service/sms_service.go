@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"time"
 
 	"github.com/grigta/conveer/services/sms-service/internal/models"
@@ -12,7 +11,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type SMSService struct {
