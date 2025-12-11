@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -35,8 +36,18 @@ func main() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("/app/config")
+	viper.AddConfigPath("/app/configs")
 	viper.AddConfigPath("./configs")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
+
+	// Support common env names used in our .env / docker-compose
+	_ = viper.BindEnv("rabbitmq.uri", "RABBITMQ_URL")
+	_ = viper.BindEnv("mongodb.uri", "MONGODB_URI", "MONGO_URI")
+	_ = viper.BindEnv("mongodb.database", "MONGO_DB_NAME")
+	_ = viper.BindEnv("redis.password", "REDIS_PASSWORD")
+	_ = viper.BindEnv("redis.addr", "REDIS_ADDR", "REDIS_ADDRESS")
+	_ = viper.BindEnv("redis.db", "REDIS_DB")
 
 	if err := viper.ReadInConfig(); err != nil {
 		logger.Warnf("Config file not found, using env variables: %v", err)
