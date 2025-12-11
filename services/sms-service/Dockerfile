@@ -1,3 +1,4 @@
+# Build stage
 FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
@@ -13,9 +14,9 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o sms-service cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o sms-service ./services/sms-service/cmd/main.go
 
-# Final stage
+# Runtime stage
 FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates
@@ -26,7 +27,7 @@ WORKDIR /app
 COPY --from=builder /app/sms-service .
 
 # Copy config files
-COPY --from=builder /app/configs ./configs
+COPY services/sms-service/configs ./configs
 
 # Create directory for logs
 RUN mkdir -p /app/logs
