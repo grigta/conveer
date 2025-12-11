@@ -46,7 +46,7 @@ func NewAccountRepository(db *mongo.Database, encryptor crypto.Encryptor, logger
 }
 
 func (r *accountRepository) collection() *mongo.Collection {
-	return r.db.Collection("vk_accounts")
+	return r.db.GetCollection("vk_accounts")
 }
 
 func (r *accountRepository) CreateAccount(ctx context.Context, account *models.VKAccount) error {

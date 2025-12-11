@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -111,8 +112,8 @@ func (am *AuthMiddleware) GenerateToken(userID, email, role string) (string, err
 		"user_id": userID,
 		"email":   email,
 		"role":    role,
-		"exp":     jwt.NewNumericDate(jwt.TimeFunc().Add(24 * 60 * 60)),
-		"iat":     jwt.NewNumericDate(jwt.TimeFunc()),
+		"exp":     jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		"iat":     jwt.NewNumericDate(time.Now()),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

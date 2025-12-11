@@ -43,7 +43,7 @@ func (r *ProxyRepository) CreateProxy(ctx context.Context, proxy *models.Proxy) 
 	proxy.CreatedAt = time.Now()
 	proxy.LastChecked = time.Now()
 
-	result, err := r.db.Collection("proxies").InsertOne(ctx, proxy)
+	result, err := r.db.GetCollection("proxies").InsertOne(ctx, proxy)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to insert proxy")
 		return err
@@ -55,7 +55,7 @@ func (r *ProxyRepository) CreateProxy(ctx context.Context, proxy *models.Proxy) 
 
 func (r *ProxyRepository) GetProxyByID(ctx context.Context, id primitive.ObjectID) (*models.Proxy, error) {
 	var proxy models.Proxy
-	err := r.db.Collection("proxies").FindOne(ctx, bson.M{"_id": id}).Decode(&proxy)
+	err := r.db.GetCollection("proxies").FindOne(ctx, bson.M{"_id": id}).Decode(&proxy)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("proxy not found")
@@ -101,7 +101,7 @@ func (r *ProxyRepository) GetAvailableProxies(ctx context.Context, filters model
 		filter["provider"] = filters.Provider
 	}
 
-	cursor, err := r.db.Collection("proxies").Find(ctx, filter)
+	cursor, err := r.db.GetCollection("proxies").Find(ctx, filter)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to get available proxies")
 		return nil, err
@@ -139,7 +139,7 @@ func (r *ProxyRepository) UpdateProxyStatus(ctx context.Context, id primitive.Ob
 		},
 	}
 
-	result, err := r.db.Collection("proxies").UpdateOne(ctx, bson.M{"_id": id}, update)
+	result, err := r.db.GetCollection("proxies").UpdateOne(ctx, bson.M{"_id": id}, update)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to update proxy status")
 		return err
@@ -159,7 +159,7 @@ func (r *ProxyRepository) UpdateProxyHealth(ctx context.Context, id primitive.Ob
 	opts := options.Replace().SetUpsert(true)
 	filter := bson.M{"proxy_id": id}
 
-	_, err := r.db.Collection("proxy_health").ReplaceOne(ctx, filter, health, opts)
+	_, err := r.db.GetCollection("proxy_health").ReplaceOne(ctx, filter, health, opts)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to update proxy health")
 		return err
@@ -169,7 +169,7 @@ func (r *ProxyRepository) UpdateProxyHealth(ctx context.Context, id primitive.Ob
 }
 
 func (r *ProxyRepository) GetProxiesByStatus(ctx context.Context, status models.ProxyStatus) ([]models.Proxy, error) {
-	cursor, err := r.db.Collection("proxies").Find(ctx, bson.M{"status": status})
+	cursor, err := r.db.GetCollection("proxies").Find(ctx, bson.M{"status": status})
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to get proxies by status")
 		return nil, err
@@ -205,7 +205,7 @@ func (r *ProxyRepository) GetExpiredProxies(ctx context.Context) ([]models.Proxy
 		"status": bson.M{"$ne": models.ProxyStatusReleased},
 	}
 
-	cursor, err := r.db.Collection("proxies").Find(ctx, filter)
+	cursor, err := r.db.GetCollection("proxies").Find(ctx, filter)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to get expired proxies")
 		return nil, err
@@ -249,7 +249,7 @@ func (r *ProxyRepository) BindProxyToAccount(ctx context.Context, proxyID primit
 			},
 		}
 
-		_, err := r.db.Collection("proxy_bindings").UpdateMany(sc, existingBinding, update)
+		_, err := r.db.GetCollection("proxy_bindings").UpdateMany(sc, existingBinding, update)
 		if err != nil {
 			return err
 		}
@@ -262,7 +262,7 @@ func (r *ProxyRepository) BindProxyToAccount(ctx context.Context, proxyID primit
 			Status:     models.BindingStatusActive,
 		}
 
-		_, err = r.db.Collection("proxy_bindings").InsertOne(sc, binding)
+		_, err = r.db.GetCollection("proxy_bindings").InsertOne(sc, binding)
 		if err != nil {
 			return err
 		}
@@ -273,7 +273,7 @@ func (r *ProxyRepository) BindProxyToAccount(ctx context.Context, proxyID primit
 			},
 		}
 
-		_, err = r.db.Collection("proxies").UpdateOne(sc, bson.M{"_id": proxyID}, proxyUpdate)
+		_, err = r.db.GetCollection("proxies").UpdateOne(sc, bson.M{"_id": proxyID}, proxyUpdate)
 		if err != nil {
 			return err
 		}
@@ -296,7 +296,7 @@ func (r *ProxyRepository) ReleaseProxyBinding(ctx context.Context, proxyID primi
 		},
 	}
 
-	_, err := r.db.Collection("proxy_bindings").UpdateOne(ctx, bson.M{"proxy_id": proxyID, "status": models.BindingStatusActive}, update)
+	_, err := r.db.GetCollection("proxy_bindings").UpdateOne(ctx, bson.M{"proxy_id": proxyID, "status": models.BindingStatusActive}, update)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to release proxy binding")
 		return err
@@ -308,7 +308,7 @@ func (r *ProxyRepository) ReleaseProxyBinding(ctx context.Context, proxyID primi
 		},
 	}
 
-	_, err = r.db.Collection("proxies").UpdateOne(ctx, bson.M{"_id": proxyID}, proxyUpdate)
+	_, err = r.db.GetCollection("proxies").UpdateOne(ctx, bson.M{"_id": proxyID}, proxyUpdate)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to update proxy status to released")
 		return err
@@ -319,7 +319,7 @@ func (r *ProxyRepository) ReleaseProxyBinding(ctx context.Context, proxyID primi
 
 func (r *ProxyRepository) GetProxyByAccountID(ctx context.Context, accountID string) (*models.Proxy, error) {
 	var binding models.ProxyBinding
-	err := r.db.Collection("proxy_bindings").FindOne(ctx, bson.M{
+	err := r.db.GetCollection("proxy_bindings").FindOne(ctx, bson.M{
 		"account_id": accountID,
 		"status": models.BindingStatusActive,
 	}).Decode(&binding)
@@ -353,7 +353,7 @@ func (r *ProxyRepository) CreateIndexes(ctx context.Context) error {
 		},
 	}
 
-	_, err := r.db.Collection("proxies").Indexes().CreateMany(ctx, proxiesIndexes)
+	_, err := r.db.GetCollection("proxies").Indexes().CreateMany(ctx, proxiesIndexes)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to create proxies indexes")
 		return err
@@ -372,7 +372,7 @@ func (r *ProxyRepository) CreateIndexes(ctx context.Context) error {
 		},
 	}
 
-	_, err = r.db.Collection("proxy_health").Indexes().CreateMany(ctx, healthIndexes)
+	_, err = r.db.GetCollection("proxy_health").Indexes().CreateMany(ctx, healthIndexes)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to create proxy_health indexes")
 		return err
@@ -396,7 +396,7 @@ func (r *ProxyRepository) CreateIndexes(ctx context.Context) error {
 		},
 	}
 
-	_, err = r.db.Collection("proxy_bindings").Indexes().CreateMany(ctx, bindingIndexes)
+	_, err = r.db.GetCollection("proxy_bindings").Indexes().CreateMany(ctx, bindingIndexes)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to create proxy_bindings indexes")
 		return err
@@ -411,31 +411,31 @@ func (r *ProxyRepository) GetProxyStatistics(ctx context.Context) (*models.Proxy
 		ProxiesByCountry: make(map[string]int64),
 	}
 
-	total, err := r.db.Collection("proxies").CountDocuments(ctx, bson.M{})
+	total, err := r.db.GetCollection("proxies").CountDocuments(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
 	stats.TotalProxies = total
 
-	active, err := r.db.Collection("proxies").CountDocuments(ctx, bson.M{"status": models.ProxyStatusActive})
+	active, err := r.db.GetCollection("proxies").CountDocuments(ctx, bson.M{"status": models.ProxyStatusActive})
 	if err != nil {
 		return nil, err
 	}
 	stats.ActiveProxies = active
 
-	expired, err := r.db.Collection("proxies").CountDocuments(ctx, bson.M{"status": models.ProxyStatusExpired})
+	expired, err := r.db.GetCollection("proxies").CountDocuments(ctx, bson.M{"status": models.ProxyStatusExpired})
 	if err != nil {
 		return nil, err
 	}
 	stats.ExpiredProxies = expired
 
-	banned, err := r.db.Collection("proxies").CountDocuments(ctx, bson.M{"status": models.ProxyStatusBanned})
+	banned, err := r.db.GetCollection("proxies").CountDocuments(ctx, bson.M{"status": models.ProxyStatusBanned})
 	if err != nil {
 		return nil, err
 	}
 	stats.BannedProxies = banned
 
-	bindings, err := r.db.Collection("proxy_bindings").CountDocuments(ctx, bson.M{"status": models.BindingStatusActive})
+	bindings, err := r.db.GetCollection("proxy_bindings").CountDocuments(ctx, bson.M{"status": models.BindingStatusActive})
 	if err != nil {
 		return nil, err
 	}
@@ -448,7 +448,7 @@ func (r *ProxyRepository) GetProxyStatistics(ctx context.Context) (*models.Proxy
 		}},
 	}
 
-	cursor, err := r.db.Collection("proxies").Aggregate(ctx, pipeline)
+	cursor, err := r.db.GetCollection("proxies").Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
@@ -471,7 +471,7 @@ func (r *ProxyRepository) GetProxyStatistics(ctx context.Context) (*models.Proxy
 		}},
 	}
 
-	cursor2, err := r.db.Collection("proxies").Aggregate(ctx, pipeline)
+	cursor2, err := r.db.GetCollection("proxies").Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
@@ -495,7 +495,7 @@ func (r *ProxyRepository) GetProxyStatistics(ctx context.Context) (*models.Proxy
 		}},
 	}
 
-	cursor3, err := r.db.Collection("proxy_health").Aggregate(ctx, healthPipeline)
+	cursor3, err := r.db.GetCollection("proxy_health").Aggregate(ctx, healthPipeline)
 	if err == nil && cursor3.Next(ctx) {
 		var result struct {
 			AvgFraudScore float64 `bson:"avg_fraud_score"`
@@ -514,7 +514,7 @@ func (r *ProxyRepository) GetProxyStatistics(ctx context.Context) (*models.Proxy
 func (r *ProxyRepository) getOccupiedProxyIDs(ctx context.Context) ([]primitive.ObjectID, error) {
 	filter := bson.M{"status": models.BindingStatusActive}
 
-	cursor, err := r.db.Collection("proxy_bindings").Find(ctx, filter, options.Find().SetProjection(bson.M{"proxy_id": 1}))
+	cursor, err := r.db.GetCollection("proxy_bindings").Find(ctx, filter, options.Find().SetProjection(bson.M{"proxy_id": 1}))
 	if err != nil {
 		return nil, err
 	}
@@ -535,7 +535,7 @@ func (r *ProxyRepository) getOccupiedProxyIDs(ctx context.Context) ([]primitive.
 
 func (r *ProxyRepository) GetActiveBindingByProxyID(ctx context.Context, proxyID primitive.ObjectID) (*models.ProxyBinding, error) {
 	var binding models.ProxyBinding
-	err := r.db.Collection("proxy_bindings").FindOne(ctx, bson.M{
+	err := r.db.GetCollection("proxy_bindings").FindOne(ctx, bson.M{
 		"proxy_id": proxyID,
 		"status": models.BindingStatusActive,
 	}).Decode(&binding)
@@ -553,7 +553,7 @@ func (r *ProxyRepository) GetActiveBindingByProxyID(ctx context.Context, proxyID
 
 func (r *ProxyRepository) GetProxyHealthByID(ctx context.Context, proxyID primitive.ObjectID) (*models.ProxyHealth, error) {
 	var health models.ProxyHealth
-	err := r.db.Collection("proxy_health").FindOne(ctx, bson.M{
+	err := r.db.GetCollection("proxy_health").FindOne(ctx, bson.M{
 		"proxy_id": proxyID,
 	}).Decode(&health)
 

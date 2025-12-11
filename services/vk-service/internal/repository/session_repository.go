@@ -41,7 +41,7 @@ func NewSessionRepository(db *mongo.Database, redisClient *redis.Client, logger 
 }
 
 func (r *sessionRepository) collection() *mongo.Collection {
-	return r.db.Collection("vk_registration_sessions")
+	return r.db.GetCollection("vk_registration_sessions")
 }
 
 func (r *sessionRepository) SaveSession(ctx context.Context, session *models.RegistrationSession) error {

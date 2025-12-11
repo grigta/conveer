@@ -28,7 +28,7 @@ func NewProviderRepository(db *database.MongoDB, logger *logrus.Logger) *Provide
 
 func (r *ProviderRepository) GetProviderConfig(ctx context.Context, name string) (*models.ProxyProvider, error) {
 	var provider models.ProxyProvider
-	err := r.db.Collection("proxy_providers").FindOne(ctx, bson.M{"name": name}).Decode(&provider)
+	err := r.db.GetCollection("proxy_providers").FindOne(ctx, bson.M{"name": name}).Decode(&provider)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("provider not found")
@@ -44,7 +44,7 @@ func (r *ProviderRepository) ListActiveProviders(ctx context.Context) ([]models.
 	filter := bson.M{"enabled": true}
 	opts := options.Find().SetSort(bson.D{{Key: "priority", Value: 1}})
 
-	cursor, err := r.db.Collection("proxy_providers").Find(ctx, filter, opts)
+	cursor, err := r.db.GetCollection("proxy_providers").Find(ctx, filter, opts)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to list active providers")
 		return nil, err
@@ -71,7 +71,7 @@ func (r *ProviderRepository) UpdateProviderStats(ctx context.Context, name strin
 	filter := bson.M{"provider_name": name}
 	opts := options.Replace().SetUpsert(true)
 
-	_, err := r.db.Collection("provider_stats").ReplaceOne(ctx, filter, stats, opts)
+	_, err := r.db.GetCollection("provider_stats").ReplaceOne(ctx, filter, stats, opts)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to update provider stats")
 		return err
@@ -82,7 +82,7 @@ func (r *ProviderRepository) UpdateProviderStats(ctx context.Context, name strin
 
 func (r *ProviderRepository) GetProviderStats(ctx context.Context, name string) (*models.ProviderStats, error) {
 	var stats models.ProviderStats
-	err := r.db.Collection("provider_stats").FindOne(ctx, bson.M{"provider_name": name}).Decode(&stats)
+	err := r.db.GetCollection("provider_stats").FindOne(ctx, bson.M{"provider_name": name}).Decode(&stats)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return &models.ProviderStats{
@@ -112,7 +112,7 @@ func (r *ProviderRepository) IncrementProviderCounter(ctx context.Context, name 
 	}
 
 	opts := options.Update().SetUpsert(true)
-	_, err := r.db.Collection("provider_stats").UpdateOne(
+	_, err := r.db.GetCollection("provider_stats").UpdateOne(
 		ctx,
 		bson.M{"provider_name": name},
 		update,
@@ -136,7 +136,7 @@ func (r *ProviderRepository) UpdateProviderActiveProxies(ctx context.Context, na
 	}
 
 	opts := options.Update().SetUpsert(true)
-	_, err := r.db.Collection("provider_stats").UpdateOne(
+	_, err := r.db.GetCollection("provider_stats").UpdateOne(
 		ctx,
 		bson.M{"provider_name": name},
 		update,
@@ -152,7 +152,7 @@ func (r *ProviderRepository) UpdateProviderActiveProxies(ctx context.Context, na
 }
 
 func (r *ProviderRepository) GetAllProviderStats(ctx context.Context) ([]models.ProviderStats, error) {
-	cursor, err := r.db.Collection("provider_stats").Find(ctx, bson.M{})
+	cursor, err := r.db.GetCollection("provider_stats").Find(ctx, bson.M{})
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to get all provider stats")
 		return nil, err
@@ -176,7 +176,7 @@ func (r *ProviderRepository) SaveProviderConfig(ctx context.Context, provider *m
 	filter := bson.M{"name": provider.Name}
 	opts := options.Replace().SetUpsert(true)
 
-	_, err := r.db.Collection("proxy_providers").ReplaceOne(ctx, filter, provider, opts)
+	_, err := r.db.GetCollection("proxy_providers").ReplaceOne(ctx, filter, provider, opts)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to save provider config")
 		return err
@@ -196,7 +196,7 @@ func (r *ProviderRepository) CreateIndexes(ctx context.Context) error {
 		},
 	}
 
-	_, err := r.db.Collection("proxy_providers").Indexes().CreateMany(ctx, providerIndexes)
+	_, err := r.db.GetCollection("proxy_providers").Indexes().CreateMany(ctx, providerIndexes)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to create proxy_providers indexes")
 		return err
@@ -209,7 +209,7 @@ func (r *ProviderRepository) CreateIndexes(ctx context.Context) error {
 		},
 	}
 
-	_, err = r.db.Collection("provider_stats").Indexes().CreateMany(ctx, statsIndexes)
+	_, err = r.db.GetCollection("provider_stats").Indexes().CreateMany(ctx, statsIndexes)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to create provider_stats indexes")
 		return err
