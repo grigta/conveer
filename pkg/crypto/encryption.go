@@ -18,10 +18,25 @@ type Encryptor struct {
 }
 
 func NewEncryptor(key string) (*Encryptor, error) {
-	if len(key) != 32 {
-		return nil, fmt.Errorf("encryption key must be exactly 32 bytes")
+	// Accept either:
+	// - raw 32-byte key (len==32)
+	// - hex-encoded 32-byte key (len==64)
+	if len(key) == 32 {
+		return &Encryptor{key: []byte(key)}, nil
 	}
-	return &Encryptor{key: []byte(key)}, nil
+
+	if len(key) == 64 {
+		decoded, err := hex.DecodeString(key)
+		if err != nil {
+			return nil, fmt.Errorf("invalid hex encryption key: %w", err)
+		}
+		if len(decoded) != 32 {
+			return nil, fmt.Errorf("encryption key must be exactly 32 bytes")
+		}
+		return &Encryptor{key: decoded}, nil
+	}
+
+	return nil, fmt.Errorf("encryption key must be exactly 32 bytes")
 }
 
 func (e *Encryptor) Encrypt(plaintext string) (string, error) {
