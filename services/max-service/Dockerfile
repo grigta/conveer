@@ -14,18 +14,15 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN cd services/max-service && go build -o /bin/max-service cmd/main.go
+RUN cd services/max-service && CGO_ENABLED=0 GOOS=linux go build -o /bin/max-service cmd/main.go
 
 # Runtime stage with Playwright
-FROM mcr.microsoft.com/playwright/go:v1.40.0
+FROM mcr.microsoft.com/playwright:v1.40.0-focal
 
-# Install additional dependencies
+# Install CA certificates
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
-
-# Create non-root user
-RUN useradd -m -u 1000 appuser
 
 # Copy binary from builder
 COPY --from=builder /bin/max-service /bin/max-service
@@ -35,12 +32,6 @@ COPY services/max-service/configs /app/configs
 
 # Set working directory
 WORKDIR /app
-
-# Change ownership
-RUN chown -R appuser:appuser /app
-
-# Switch to non-root user
-USER appuser
 
 # Expose ports
 EXPOSE 50062 8012
